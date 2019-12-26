@@ -1,0 +1,92 @@
+#!/bin/bash -eu
+#
+# Chroot into a Raspberry OS image
+#
+
+function out()
+{
+	local rc=${?}
+
+	umount_dev
+
+	if [ "${rc}" -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+
+	exit "${rc}"
+}
+
+function mount_dev()
+{
+	local image=${1} part_num=${2}
+
+	LOOPDEV=$(sudo losetup --show --partscan --find "${image}")
+	sleep 1
+
+	MOUNTPOINT=$(mktemp -d --tmp qemu-raspi-XXXXXX)
+	sudo mount "${LOOPDEV}p${part_num}" "${MOUNTPOINT}"
+}
+
+function umount_dev()
+{
+	if [ -n "${MOUNTPOINT}" ] ; then
+		if sudo umount "${MOUNTPOINT}" || sudo umount -l "${MOUNTPOINT}" ; then
+			rmdir "${MOUNTPOINT}"
+		fi
+		MOUNTPOINT=
+	fi
+
+	if [ -n "${LOOPDEV}" ] ; then
+		sudo losetup --detach "${LOOPDEV}"
+		LOOPDEV=
+	fi
+}
+
+function usage()
+{
+    cat <<EOF
+Usage: chroot-raspi [-h] IMAGE
+
+Positional arguments:
+  IMAGE   The image file containing the OS to chroot into.
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+image=
+
+while [ $# -ne 0 ] ; do
+    case "${1}" in
+        -h|--help)
+            usage
+            exit
+            ;;
+        *)
+            if [ -n "${image}" ] ; then
+                echo "Unexpected argument: ${1}" >&2
+                exit 2
+            fi
+            image=$(readlink -f "${1}")
+            ;;
+    esac
+    shift
+done
+
+if [ -z "${image}" ] ; then
+    usage >&2
+    exit 2
+fi
+
+if ! [ -f "${image}" ] ; then
+    echo "No such image file: ${image}" >&2
+    exit 1
+fi
+
+LOOPDEV=
+MOUNTPOINT=
+trap out EXIT INT TERM HUP
+
+mount_dev "${image}" 2
+sudo chroot "${MOUNTPOINT}" /bin/sh

@@ -1,0 +1,87 @@
+#!/bin/bash -eu
+#
+# Run a Raspberry OS image in QEMU
+#
+
+function out()
+{
+	local rc=${?}
+
+	rm -rf "${TMPDIR}"
+
+	if [ "${rc}" -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+
+	exit "${rc}"
+}
+
+function usage()
+{
+    cat <<EOF
+Usage: qemu-raspi [-h] IMAGE
+
+Positional arguments:
+  IMAGE   The image file containing the OS to run.
+
+Optional arguments:
+  -h, --help  Show this help text and exit.
+EOF
+}
+
+image=
+
+while [ $# -ne 0 ] ; do
+    case "${1}" in
+        -h|--help)
+            usage
+            exit
+            ;;
+        *)
+            if [ -n "${image}" ] ; then
+                echo "Unexpected argument: ${1}" >&2
+                exit 2
+            fi
+            image=$(readlink -f "${1}")
+            ;;
+    esac
+    shift
+done
+
+if [ -z "${image}" ] ; then
+    usage >&2
+    exit 2
+fi
+
+if ! [ -f "${image}" ] ; then
+    echo "No such image file: ${image}" >&2
+    exit 1
+fi
+
+# Create a temporary directory and install an exit handler
+TMPDIR=$(mktemp -d --tmp qemu-raspi-XXXXXX)
+trap out EXIT INT TERM HUP
+
+# Create a temporary disk image using the provided image file as a backing
+# file, so that we don't modify the original image
+qemu-img create -f qcow2 -b "${image}" "${TMPDIR}/disk.qcow2" 8G
+
+# Assemble the qemu command and options
+qemu="qemu-system-aarch64"
+qemu_opts=(
+	"-M" "raspi3"
+	"-m" "1G"
+	"-smp" "4"
+	"-no-reboot"
+ 	"-nographic"
+	"-drive" "file=${TMPDIR}/disk.qcow2,format=qcow2,if=sd"
+	"-kernel" "boot/kernel8.img"
+	"-dtb" "boot/bcm2710-rpi-3-b.dtb"
+	"-append" "root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200"
+)
+
+echo
+echo "${qemu} ${qemu_opts[*]}"
+echo
+
+exec "${qemu}" "${qemu_opts[@]}"
