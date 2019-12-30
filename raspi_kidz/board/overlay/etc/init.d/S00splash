@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Display splash images on bootup and shutdown
+#
+
+SPLASH_IMAGE_BOOTUP=/var/lib/splash/poweron.gif
+SPLASH_IMAGE_SHUTDOWN=/var/lib/splash/shutdown.gif
+
+case "$1" in
+	start)
+		printf "Displaying splash image (bootup): "
+		echo "q" | /usr/bin/fbv "$SPLASH_IMAGE_BOOTUP" >/dev/null
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	stop)
+		printf "Displaying splash image (shutdown): "
+		echo "q" | /usr/bin/fbv "$SPLASH_IMAGE_SHUTDOWN" >/dev/null
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 1
+esac
+
+exit $?
