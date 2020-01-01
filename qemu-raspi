@@ -58,6 +58,9 @@ if ! [ -f "${image}" ] ; then
     exit 1
 fi
 
+# Location of this script
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+
 # Create a temporary directory and install an exit handler
 TMPDIR=$(mktemp -d --tmp qemu-raspi-XXXXXX)
 trap out EXIT INT TERM HUP
@@ -73,11 +76,10 @@ qemu_opts=(
 	"-m" "1G"
 	"-smp" "4"
 	"-no-reboot"
- 	"-nographic"
 	"-drive" "file=${TMPDIR}/disk.qcow2,format=qcow2,if=sd"
-	"-kernel" "boot/kernel8.img"
-	"-dtb" "boot/bcm2710-rpi-3-b.dtb"
-	"-append" "root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200"
+	"-kernel" "${here}/boot/kernel8.img"
+	"-dtb" "${here}/boot/bcm2710-rpi-3-b.dtb"
+	"-append" "root=/dev/mmcblk0p2 rootwait console=ttyAMA0,115200 logo.nologo vt.global_cursor_default=0"
 )
 
 echo
