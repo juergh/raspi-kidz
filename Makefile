@@ -29,6 +29,8 @@ $(BR2_DEFCONFIG) clean: $(BR2_DIR)
 all menuconfig: $(BR2_DEFCONFIG)
 	$(BR2_MAKE) $@
 	if [ "$@" = "menuconfig" ] ; then \
-	    cp $(BR2_DIR)/.config $(BR2_EXTERNAL)/configs/$(BR2_DEFCONFIG) ; \
+	    $(BR2_MAKE) savedefconfig ; \
 	    sed -i 's,$(PWD),../..,' $(BR2_EXTERNAL)/configs/$(BR2_DEFCONFIG) ; \
 	fi
+
+.PHONY: default qemu clean $(BR2_DEFCONFIG) all menuconfig
