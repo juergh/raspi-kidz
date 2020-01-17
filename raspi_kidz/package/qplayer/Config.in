@@ -1,0 +1,4 @@
+config BR2_PACKAGE_QPLAYER
+    bool "Qplayer"
+    help
+        A simple QT Audio player
