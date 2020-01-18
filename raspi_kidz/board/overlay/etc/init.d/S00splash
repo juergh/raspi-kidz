@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# Display splash images on poweron and shutdown
+# Display splash images on poweron and poweroff
 #
 
 SPLASH_IMAGE_POWERON=/var/lib/splash/poweron.png
-SPLASH_IMAGE_SHUTDOWN=/var/lib/splash/shutdown.png
+SPLASH_IMAGE_POWEROFF=/var/lib/splash/poweroff.png
 
 case "$1" in
 	start)
@@ -13,8 +13,8 @@ case "$1" in
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
 		;;
 	stop)
-		printf "Displaying splash image (shutdown): "
-		echo "q" | /usr/bin/fbv "$SPLASH_IMAGE_SHUTDOWN" >/dev/null
+		printf "Displaying splash image (poweroff): "
+		echo "q" | /usr/bin/fbv "$SPLASH_IMAGE_POWEROFF" >/dev/null
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
 		;;
 	*)
