@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Display a splash image on poweroff
+#
+
+SPLASH_IMAGE_POWEROFF=/var/lib/splash/poweroff.png
+
+case "$1" in
+	stop)
+		printf "Displaying splash image (poweroff): "
+		echo "q" | /usr/bin/fbv "$SPLASH_IMAGE_POWEROFF" >/dev/null
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+esac
+
+exit $?
