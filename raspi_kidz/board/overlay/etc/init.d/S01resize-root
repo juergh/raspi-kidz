@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Resize the root partition and filesystem
+#
+
+root_dev=/dev/mmcblk0
+root_part_dev=/dev/mmcblk0p2
+root_part_num=2
+
+result="OK"
+
+printf "Resizing root filesystem: "
+
+root_dev_size=$(cat "/sys/block/${root_dev##*/}/size")
+root_end=$((root_dev_size - 1))
+
+# Grow the root partition
+if ! parted -m "${root_dev}" u s resizepart "${root_part_num}" "${root_end}" ; then
+	result="FAIL"
+fi
+
+# Resize the root filesystem
+if ! resize2fs "${root_part_dev}" ; then
+	result="FAIL"
+fi
+
+# Remove ourselves since we're no longer needed
+if ! rm "$(readlink -f "$0")" ; then
+	result="FAIL"
+fi
+
+echo "${result}"
