@@ -27,6 +27,9 @@ qemu:
 
 # Generic buildroot rules
 %:
+	if [ "$@" = "menuconfig" ] ; then \
+	    $(MAKE) defconfig ; \
+	fi
 	BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR) $@
 	if [ "$@" = "menuconfig" ] ; then \
 	    $(MAKE) savedefconfig ; \
