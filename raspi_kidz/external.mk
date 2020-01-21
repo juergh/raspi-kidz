@@ -1,1 +1,1 @@
-include $(sort $(wildcard $(BR2_EXTERNAL_raspi_kidz_PATH)/package/*/*.mk))
+include $(sort $(wildcard $(BR2_EXTERNAL_RASPI_KIDZ_PATH)/package/*/*.mk))
