@@ -67,7 +67,7 @@ trap out EXIT INT TERM HUP
 
 # Create a temporary disk image using the provided image file as a backing
 # file, so that we don't modify the original image
-qemu-img create -f qcow2 -b "${image}" "${TMPDIR}/disk.qcow2" 8G
+qemu-img create -f qcow2 -b "${image}" "${TMPDIR}/disk.qcow2" 2G
 
 # Assemble the qemu command and options
 qemu="qemu-system-aarch64"
@@ -79,7 +79,8 @@ qemu_opts=(
 	"-drive" "file=${TMPDIR}/disk.qcow2,format=qcow2,if=sd"
 	"-kernel" "${here}/boot/kernel8.img"
 	"-dtb" "${here}/boot/bcm2710-rpi-3-b.dtb"
-	"-append" "root=/dev/mmcblk0p2 rootwait console=ttyAMA0,115200 logo.nologo vt.global_cursor_default=0"
+	"-append" "root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200"
+#	"-append" "root=/dev/mmcblk0p2 rootwait console=ttyAMA0,115200 logo.nologo vt.global_cursor_default=0"
 )
 
 echo
