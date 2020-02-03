@@ -1,5 +1,0 @@
-#!/bin/bash -e
-
-for f in kernel8.img bcm2710-rpi-3-b.dtb ; do
-	wget -O "${f}"  https://github.com/raspberrypi/firmware/raw/master/boot/"${f}"
-done

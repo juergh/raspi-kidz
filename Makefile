@@ -7,6 +7,8 @@ BR2_VERSION := 2019.11
 BR2_EXTERNAL := $(PWD)/raspi_kidz
 BR2_DEFCONFIG := raspi_kidz_defconfig
 
+FW_DIR := $(BUILDD)/firmware
+
 default:
 	$(MAKE) defconfig
 	$(MAKE) all
@@ -22,7 +24,12 @@ defconfig: $(BR2_DIR)
 deepclean:
 	rm -rf $(BUILDD)
 
-qemu:
+$(FW_DIR):
+	mkdir -p $(FW_DIR)
+	git clone --depth 1 --branch master \
+	    git://github.com/raspberrypi/firmware $(FW_DIR)
+
+qemu: $(FW_DIR)
 	./qemu-raspi $(BR2_DIR)/output/images/sdcard.img
 
 # Generic buildroot rules

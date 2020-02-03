@@ -61,13 +61,22 @@ fi
 # Location of this script
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 
+# Location of the raspberry firmware files
+fw_dir=${here}/buildd/firmware
+
 # Create a temporary directory and install an exit handler
 TMPDIR=$(mktemp -d --tmp qemu-raspi-XXXXXX)
 trap out EXIT INT TERM HUP
 
 # Create a temporary disk image using the provided image file as a backing
 # file, so that we don't modify the original image
-qemu-img create -f qcow2 -b "${image}" "${TMPDIR}/disk.qcow2" 2G
+tmp_image="${TMPDIR}/disk.qcow2"
+qemu-img create -f qcow2 -b "${image}" "${tmp_image}" 2G
+
+# Inject the kernel modules into the temporary image
+#partmount "${tmp_image}" 2 "${TMPDIR}/image"
+#cp -aR "${fw_dir}/module/*-v8*" "${TMPDIR}/image/lib/modules/"
+#partumount "${TMPDIR}/image"
 
 # Assemble the qemu command and options
 qemu="qemu-system-aarch64"
@@ -77,8 +86,8 @@ qemu_opts=(
 	"-smp" "4"
 	"-no-reboot"
 	"-drive" "file=${TMPDIR}/disk.qcow2,format=qcow2,if=sd"
-	"-kernel" "${here}/boot/kernel8.img"
-	"-dtb" "${here}/boot/bcm2710-rpi-3-b.dtb"
+	"-kernel" "${fw_dir}/boot/kernel8.img"
+	"-dtb" "${fw_dir}/boot/bcm2710-rpi-3-b.dtb"
 	"-append" "root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200"
 #	"-append" "root=/dev/mmcblk0p2 rootwait console=ttyAMA0,115200 logo.nologo vt.global_cursor_default=0"
 )
