@@ -1,6 +1,0 @@
-#!/bin/sh
-#
-# juergh: temporary overlay override
-#
-
-exit 0
