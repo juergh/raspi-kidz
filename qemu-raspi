@@ -1,11 +1,13 @@
 #!/bin/bash -eu
 #
-# Run a Raspberry OS image in QEMU
+# Run a Raspberry Pi OS image in QEMU
 #
 
 function out()
 {
 	local rc=${?}
+
+	trap - EXIT INT TERM HUP
 
 	rm -rf "${TMPDIR}"
 
@@ -19,50 +21,54 @@ function out()
 function usage()
 {
     cat <<EOF
-Usage: qemu-raspi [-h] IMAGE
+Usage: qemu-raspi [-h] KERNEL IMAGE
 
 Positional arguments:
-  IMAGE   The image file containing the OS to run.
+  KERNEL      The kernel to use for booting the image.
+  IMAGE       The image file containing the OS to run.
 
 Optional arguments:
   -h, --help  Show this help text and exit.
 EOF
 }
 
+kernel=
 image=
 
 while [ $# -ne 0 ] ; do
-    case "${1}" in
-        -h|--help)
-            usage
-            exit
-            ;;
-        *)
-            if [ -n "${image}" ] ; then
-                echo "Unexpected argument: ${1}" >&2
-                exit 2
-            fi
-            image=$(readlink -f "${1}")
-            ;;
-    esac
-    shift
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		*)
+			if [ -z "${kernel}" ] ; then
+				kernel=$(readlink -f "${1}")
+			elif [ -z "${image}" ] ; then
+				image=$(readlink -f "${1}")
+			else
+				echo "Unexpected argument: ${1}" >&2
+				exit 2
+			fi
+			;;
+	esac
+	shift
 done
 
-if [ -z "${image}" ] ; then
+if [ -z "${image}" ] || [ -z "${kernel}" ] ; then
     usage >&2
     exit 2
+fi
+
+if ! [ -f "${kernel}" ] ; then
+    echo "No such kernel file: ${kernel}" >&2
+    exit 1
 fi
 
 if ! [ -f "${image}" ] ; then
     echo "No such image file: ${image}" >&2
     exit 1
 fi
-
-# Location of this script
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-
-# Location of the raspberry firmware files
-fw_dir=${here}/buildd/firmware
 
 # Create a temporary directory and install an exit handler
 TMPDIR=$(mktemp -d --tmp qemu-raspi-XXXXXX)
@@ -71,29 +77,30 @@ trap out EXIT INT TERM HUP
 # Create a temporary disk image using the provided image file as a backing
 # file, so that we don't modify the original image
 tmp_image="${TMPDIR}/disk.qcow2"
-qemu-img create -f qcow2 -b "${image}" "${tmp_image}" 2G
-
-# Inject the kernel modules into the temporary image
-#partmount "${tmp_image}" 2 "${TMPDIR}/image"
-#cp -aR "${fw_dir}/module/*-v8*" "${TMPDIR}/image/lib/modules/"
-#partumount "${TMPDIR}/image"
+qemu-img create -f qcow2 -b "${image}" "${tmp_image}" 4G
 
 # Assemble the qemu command and options
 qemu="qemu-system-aarch64"
 qemu_opts=(
-	"-M" "raspi3"
-	"-m" "1G"
+	"-M" "virt"
+	"-accel" "tcg,thread=multi"
+	"-cpu" "cortex-a57"
+	"-m" "1024"
 	"-smp" "4"
-	"-no-reboot"
-	"-drive" "file=${TMPDIR}/disk.qcow2,format=qcow2,if=sd"
-	"-kernel" "${fw_dir}/boot/kernel8.img"
-	"-dtb" "${fw_dir}/boot/bcm2710-rpi-3-b.dtb"
-	"-append" "root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200"
-#	"-append" "root=/dev/mmcblk0p2 rootwait console=ttyAMA0,115200 logo.nologo vt.global_cursor_default=0"
+	"-device" "VGA"
+	"-device" "virtio-serial-pci"
+	"-device" "usb-ehci"
+	"-device" "usb-kbd"
+	"-device" "virtio-net-pci,netdev=net0"
+	"-netdev" "user,id=net0,hostfwd=tcp::5022-:22"
+	"-kernel" "${kernel}"
+	"-append" "root=/dev/vda2 rootwait console=tty1 console=ttyAMA0"
+	# logo.nologo vt.global_cursor_default=0
+	"-drive" "file=${tmp_image},format=qcow2"
 )
 
 echo
 echo "${qemu} ${qemu_opts[*]}"
 echo
 
-exec "${qemu}" "${qemu_opts[@]}"
+"${qemu}" "${qemu_opts[@]}"
