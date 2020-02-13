@@ -94,8 +94,7 @@ qemu_opts=(
 	"-device" "virtio-net-pci,netdev=net0"
 	"-netdev" "user,id=net0,hostfwd=tcp::5022-:22"
 	"-kernel" "${kernel}"
-	"-append" "root=/dev/vda2 rootwait console=tty1 console=ttyAMA0"
-	# logo.nologo vt.global_cursor_default=0
+	"-append" "root=/dev/vda2 rootwait console=ttyAMA0 logo.nologo vt.global_cursor_default=0"
 	"-drive" "file=${tmp_image},format=qcow2"
 )
 
