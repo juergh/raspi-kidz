@@ -7,8 +7,9 @@ BR2_VERSION := 2019.11
 BR2_EXTERNAL := $(PWD)/raspi_kidz
 BR2_DEFCONFIG := raspi_kidz_defconfig
 
-KERNEL_DIR := $(BUILDD)/linux
-KERNEL := $(KERNEL_DIR)/arch/arm64/boot/Image
+KERNEL_VER := 5.4.y
+KERNEL_DIR := $(BUILDD)/linux-$(KERNEL_VER)
+KERNEL_IMG := $(KERNEL_DIR)/arch/arm64/boot/Image
 
 NUM_CPUS := $(shell getconf _NPROCESSORS_ONLN)
 KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
@@ -30,21 +31,21 @@ deepclean:
 
 $(KERNEL_DIR)/Makefile:
 	mkdir -p $(KERNEL_DIR)
-	git clone --depth 1 --branch linux-4.19.y \
+	git clone --depth 1 --branch linux-$(KERNEL_VER) \
 	    https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git \
 	    $(KERNEL_DIR)
 
-$(KERNEL): $(KERNEL_DIR)/Makefile
+$(KERNEL_IMG): $(KERNEL_DIR)/Makefile
 	cd $(KERNEL_DIR) ; \
 	$(KMAKE) defconfig ; \
 	./scripts/config -e DRM -e DRM_BOCHS ; \
 	$(KMAKE) olddefconfig ; \
-	grep 'CONFG_DRM_BOCHS=y' .config || \
+	grep 'CONFIG_DRM_BOCHS=y' .config || \
 	  ( echo "Error: DRM_BOCHS is not enabled" ; false ) ; \
 	$(KMAKE) -j$(NUM_CPUS) Image
 
-qemu: $(KERNEL)
-	./qemu-raspi $(KERNEL) $(BR2_DIR)/output/images/sdcard.img
+qemu: $(KERNEL_IMG)
+	./qemu-raspi $(KERNEL_IMG) $(BR2_DIR)/output/images/sdcard.img
 
 # Generic buildroot rules
 %:
