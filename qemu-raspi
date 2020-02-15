@@ -87,7 +87,7 @@ qemu_opts=(
 	"-cpu" "cortex-a57"
 	"-m" "1024"
 	"-smp" "4"
-	"-device" "VGA"
+	"-device" "VGA,edid=on,xres=800,yres=480"
 	"-device" "virtio-serial-pci"
 	"-device" "usb-ehci"
 	"-device" "usb-kbd"
