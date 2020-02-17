@@ -8,6 +8,8 @@ BR2_EXTERNAL := $(PWD)/raspi_kidz
 BR2_DEFCONFIG := raspi_kidz_defconfig
 
 KERNEL_VER := 5.4.y
+KERNEL_CFG := DRM DRM_BOCHS SND_ENS1370
+
 KERNEL_DIR := $(BUILDD)/linux-$(KERNEL_VER)
 KERNEL_IMG := $(KERNEL_DIR)/arch/arm64/boot/Image
 
@@ -38,10 +40,14 @@ $(KERNEL_DIR)/Makefile:
 $(KERNEL_IMG): $(KERNEL_DIR)/Makefile
 	cd $(KERNEL_DIR) ; \
 	$(KMAKE) defconfig ; \
-	./scripts/config -e DRM -e DRM_BOCHS ; \
+	for cfg in $(KERNEL_CFG) ; do \
+	  ./scripts/config -e $${cfg} ; \
+	done ; \
 	$(KMAKE) olddefconfig ; \
-	grep 'CONFIG_DRM_BOCHS=y' .config || \
-	  ( echo "Error: DRM_BOCHS is not enabled" ; false ) ; \
+	for cfg in $(KERNEL_CFG) ; do \
+	  grep "CONFIG_$${cfg}=y" .config || \
+	    ( echo "Error: $${cfg} is not enabled" ; false ) ; \
+	done ; \
 	$(KMAKE) -j$(NUM_CPUS) Image
 
 qemu: $(KERNEL_IMG)
