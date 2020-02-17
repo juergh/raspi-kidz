@@ -21,17 +21,20 @@ function out()
 function usage()
 {
     cat <<EOF
-Usage: qemu-raspi [-h] KERNEL IMAGE
+Usage: qemu-raspi [-h] [-q QEMU] KERNEL IMAGE
 
 Positional arguments:
-  KERNEL      The kernel to use for booting the image.
-  IMAGE       The image file containing the OS to run.
+  KERNEL           The kernel to use for booting the image.
+  IMAGE            The image file containing the OS to run.
 
 Optional arguments:
-  -h, --help  Show this help text and exit.
+  -h, --help       Show this help text and exit.
+  -q, --qemu QEMU  Use the QEMU binary QEMU rather than
+                   /usr/bin/qemu-system-aarch64.
 EOF
 }
 
+qemu=qemu-system-aarch64
 kernel=
 image=
 
@@ -40,6 +43,10 @@ while [ $# -ne 0 ] ; do
 		-h|--help)
 			usage
 			exit
+			;;
+		-q|--qemu)
+			shift
+			qemu=${1}
 			;;
 		*)
 			if [ -z "${kernel}" ] ; then
@@ -80,7 +87,6 @@ tmp_image="${TMPDIR}/disk.qcow2"
 qemu-img create -f qcow2 -b "${image}" "${tmp_image}" 4G
 
 # Assemble the qemu command and options
-qemu="qemu-system-aarch64"
 qemu_opts=(
 	"-M" "virt"
 	"-accel" "tcg,thread=multi"

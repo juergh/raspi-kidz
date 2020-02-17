@@ -16,6 +16,9 @@ KERNEL_IMG := $(KERNEL_DIR)/arch/arm64/boot/Image
 NUM_CPUS := $(shell getconf _NPROCESSORS_ONLN)
 KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
 
+QEMU_DIR := $(BUILDD)/qemu
+QEMU_BIN := $(QEMU_DIR)/aarch64-softmmu/qemu-system-aarch64
+
 default:
 	$(MAKE) defconfig
 	$(MAKE) all
@@ -50,8 +53,20 @@ $(KERNEL_IMG): $(KERNEL_DIR)/Makefile
 	done ; \
 	$(KMAKE) -j$(NUM_CPUS) Image
 
-qemu: $(KERNEL_IMG)
-	./qemu-raspi $(KERNEL_IMG) $(BR2_DIR)/output/images/sdcard.img
+$(QEMU_DIR)/Makefile:
+	mkdir -p $(QEMU_DIR)
+	git clone --depth 1 --branch v4.2.0 \
+	    git://git.qemu.org/qemu.git \
+	    $(QEMU_DIR)
+
+$(QEMU_BIN): $(QEMU_DIR)/Makefile
+	cd $(QEMU_DIR) ; \
+	./configure --target-list=aarch64-softmmu ; \
+	make -j8
+
+qemu: $(QEMU_BIN) $(KERNEL_IMG)
+	./qemu-raspi -q $(QEMU_BIN) $(KERNEL_IMG) \
+	    $(BR2_DIR)/output/images/sdcard.img
 
 # Generic buildroot rules
 %:
