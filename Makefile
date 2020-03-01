@@ -62,7 +62,7 @@ $(QEMU_DIR)/Makefile:
 $(QEMU_BIN): $(QEMU_DIR)/Makefile
 	cd $(QEMU_DIR) ; \
 	./configure --target-list=aarch64-softmmu ; \
-	make -j8
+	make -j$(NUM_CPUS)
 
 qemu: $(QEMU_BIN) $(KERNEL_IMG)
 	./qemu-raspi -q $(QEMU_BIN) $(KERNEL_IMG) \
