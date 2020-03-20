@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Resize the root partition and filesystem
+# [rootfs-overlay] Resize the root partition and filesystem
 #
 
 root_dev=/dev/mmcblk0

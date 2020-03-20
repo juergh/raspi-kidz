@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Display a splash image on poweron
+# [rootfs-overlay] Display a splash image on poweron
 #
 
 SPLASH_IMAGE_POWERON=/var/lib/splash/poweron.png

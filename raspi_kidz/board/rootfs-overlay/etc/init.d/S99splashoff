@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Display a splash image on poweroff
+# [rootfs-overlay] Display a splash image on poweroff
 #
 
 SPLASH_IMAGE_POWEROFF=/var/lib/splash/poweroff.png
