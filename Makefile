@@ -19,6 +19,8 @@ KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
 QEMU_DIR := $(BUILDD)/qemu
 QEMU_BIN := $(QEMU_DIR)/aarch64-softmmu/qemu-system-aarch64
 
+WPA_SUPPLICANT_CONF := raspi_kidz/board/rootfs-overlay/etc/wpa_supplicant.conf
+
 default:
 	$(MAKE) defconfig
 	$(MAKE) all
@@ -67,6 +69,14 @@ $(QEMU_BIN): $(QEMU_DIR)/Makefile
 qemu: $(QEMU_BIN) $(KERNEL_IMG)
 	./qemu-raspi -q $(QEMU_BIN) $(KERNEL_IMG) \
 	    $(BR2_DIR)/output/images/sdcard.img
+
+$(WPA_SUPPLICANT_CONF):
+	cp raspi_kidz/board/wpa_supplicant.conf.in $@
+	@ssid="$(shell pass show local/wifi | grep '^ssid: ' | \
+		sed 's/^ssid: //')" ; \
+	pass="$(shell pass show local/wifi | grep '^passphrase: ' | \
+		sed 's/^passphrase: //')" ; \
+	wpa_passphrase "$${ssid}" "$${pass}" | sed '/#psk/d' >> $@
 
 # Generic buildroot rules
 %:
