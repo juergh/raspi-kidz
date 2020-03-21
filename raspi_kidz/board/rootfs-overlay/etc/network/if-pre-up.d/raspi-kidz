@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# [rootfs-overlay] Handle eth0 and wlan0 interfaces (pre-up)
+#
+
+if [ "$IFACE" = "eth0" ] ; then
+	[ -e /sys/class/net/eth0 ] || exit 1
+fi
+
+if [ "$IFACE" = "wlan0" ] ; then
+	wlan0_sysfs=/sys/class/net/wlan0
+	if ! [ -e "$wlan0_sysfs" ] ; then
+		# Load the Raspberry Pi wifi driver
+		modprobe brcmfmac || exit 1
+
+		# Wait 5 secs for /sys/class/net/wlan0 to appear
+		for _ in $(seq 1 10) ; do
+			if [ -e "$wlan0_sysfs" ] ; then
+				break
+			fi
+			sleep .5
+		done
+		[ -e "$wlan0_sysfs" ] || exit 1
+	fi
+
+	wpa_supplicant_pid=/var/run/wpa_supplicant.pid
+	if ! [ -e "$wpa_supplicant_pid" ] ; then
+		/usr/sbin/wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf \
+								 -P "$wpa_supplicant_pid" || exit 1
+	fi
+fi
