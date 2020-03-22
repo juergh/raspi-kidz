@@ -21,6 +21,9 @@ QEMU_BIN := $(QEMU_DIR)/aarch64-softmmu/qemu-system-aarch64
 
 WPA_SUPPLICANT_CONF := raspi_kidz/board/rootfs-overlay/etc/wpa_supplicant.conf
 
+# ----------------------------------------------------------------------------
+# Build targets
+
 default:
 	$(MAKE) defconfig
 	$(MAKE) all
@@ -78,14 +81,18 @@ $(WPA_SUPPLICANT_CONF):
 		sed 's/^passphrase: //')" ; \
 	wpa_passphrase "$${ssid}" "$${pass}" | sed '/#psk/d' >> $@
 
-# Generic buildroot rules
-%:
-	if [ "$@" = "menuconfig" ] ; then \
-	    $(MAKE) defconfig ; \
-	fi
+# ----------------------------------------------------------------------------
+# Buildroot targets
+
+all: $(WPA_SUPPLICANT_CONF)
 	BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR) $@
-	if [ "$@" = "menuconfig" ] ; then \
-	    $(MAKE) savedefconfig ; \
-	fi
+
+menuconfig:
+	$(MAKE) defconfig
+	BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR) $@
+	$(MAKE) savedefconfig
+
+%:
+	BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR) $@
 
 .PHONY: default defconfig deepclean qemu
