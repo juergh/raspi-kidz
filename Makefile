@@ -6,6 +6,7 @@ BR2_DIR := $(BUILDD)/buildroot
 BR2_VERSION := 2019.11
 BR2_EXTERNAL := $(PWD)/raspi_kidz
 BR2_DEFCONFIG := raspi_kidz_defconfig
+BR2_MAKE := BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR)
 
 KERNEL_VER := 5.4.y
 KERNEL_CFG := DRM DRM_BOCHS SND_ENS1370
@@ -85,14 +86,18 @@ $(WPA_SUPPLICANT_CONF):
 # Buildroot targets
 
 all: $(WPA_SUPPLICANT_CONF)
-	BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR) $@
+	$(BR2_MAKE) $@
 
 menuconfig:
 	$(MAKE) defconfig
-	BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR) $@
+	$(BR2_MAKE) $@
 	$(MAKE) savedefconfig
 
+clean:
+	$(BR2_MAKE) $@
+	rm -f $(WPA_SUPPLICANT_CONF)
+
 %:
-	BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR) $@
+	$(BR2_MAKE) $@
 
 .PHONY: default defconfig deepclean qemu
