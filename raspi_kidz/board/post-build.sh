@@ -2,15 +2,27 @@
 
 set -e
 
-# Remove all console and tty1 lines
-sed -i -e '/^console::/d' -e '/^tty1::/d' "${TARGET_DIR}"/etc/inittab
+#
+# Fixup /etc/initab
+#
 
-# Remove everything after '# [post-build]'
-sed -i -e '/^# \[post-build\]$/,$d' "${TARGET_DIR}"/etc/inittab
-
-# Add getty/login to the serial and HDMI consoles
-cat << __EOF__ >> "${TARGET_DIR}"/etc/inittab
+conf="${TARGET_DIR}"/etc/inittab
+sed -i -e '/^console::/d' -e '/^tty1::/d' "${conf}"
+sed -i -e '/^# \[post-build\]$/,$d' "${conf}"
+cat << __EOF__ >> "${conf}"
 # [post-build]
 # tty1::respawn:/sbin/getty -L tty1 0 vt100 # HDMI console
+tty1::respawn:/bin/login -f admin
 console::respawn:/bin/login -f admin
+__EOF__
+
+#
+# Fixup /etc/fstab
+#
+
+conf="${TARGET_DIR}"/etc/fstab
+sed -i -e '/^# \[post-build\]$/,$d' "${conf}"
+cat << __EOF__ >> "${conf}"
+# [post-build]
+/dev/mmcblk0p1   /boot   vfat   defaults   0   2
 __EOF__
