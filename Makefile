@@ -57,7 +57,8 @@ $(KERNEL_IMG): $(KERNEL_DIR)/Makefile
 	$(KMAKE) -j$(NUM_CPUS) Image
 
 qemu: $(KERNEL_IMG)
-	./qemu-raspi $(KERNEL_IMG) $(BR2_DIR)/output/images/sdcard.img
+	./qemu-raspi --mem 512 --smp 4 $(KERNEL_IMG) \
+	    $(BR2_DIR)/output/images/sdcard.img
 
 $(WPA_SUPPLICANT_CONF):
 	cp raspi_kidz/board/wpa_supplicant.conf.in $@
