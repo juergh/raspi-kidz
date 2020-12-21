@@ -47,12 +47,12 @@ $(KERNEL_IMG): $(KERNEL_DIR)/Makefile
 	cd $(KERNEL_DIR) ; \
 	$(KMAKE) defconfig ; \
 	for cfg in $(KERNEL_CFG) ; do \
-	  ./scripts/config -e $${cfg} ; \
+	    ./scripts/config -e $${cfg} ; \
 	done ; \
 	$(KMAKE) olddefconfig ; \
 	for cfg in $(KERNEL_CFG) ; do \
-	  grep "CONFIG_$${cfg}=y" .config || \
-	    ( echo "Error: $${cfg} is not enabled" ; false ) ; \
+	    grep "CONFIG_$${cfg}=y" .config || \
+	        ( echo "Error: $${cfg} is not enabled" ; false ) ; \
 	done ; \
 	$(KMAKE) -j$(NUM_CPUS) Image
 
@@ -63,9 +63,9 @@ qemu: $(KERNEL_IMG)
 $(WPA_SUPPLICANT_CONF):
 	cp raspi_kidz/board/wpa_supplicant.conf.in $@
 	@ssid="$(shell pass show local/wifi | grep '^ssid: ' | \
-		sed 's/^ssid: //')" ; \
+	               sed 's/^ssid: //')" ; \
 	pass="$(shell pass show local/wifi | grep '^passphrase: ' | \
-		sed 's/^passphrase: //')" ; \
+	              sed 's/^passphrase: //')" ; \
 	wpa_passphrase "$${ssid}" "$${pass}" | sed '/#psk/d' >> $@
 
 # ----------------------------------------------------------------------------
