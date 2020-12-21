@@ -58,13 +58,17 @@ while [ $# -ne 0 ] ; do
 			shift
 			smp=${1}
 			;;
+		-*)
+			echo "Invalid argument: ${1}" >&2
+			exit 2
+			;;
 		*)
 			if [ -z "${kernel}" ] ; then
 				kernel=$(readlink -f "${1}")
 			elif [ -z "${image}" ] ; then
 				image=$(readlink -f "${1}")
 			else
-				echo "Unexpected argument: ${1}" >&2
+				echo "Invalid argument: ${1}" >&2
 				exit 2
 			fi
 			;;
