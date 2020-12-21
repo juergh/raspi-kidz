@@ -34,9 +34,11 @@ Optional arguments:
 EOF
 }
 
-qemu=qemu-system-aarch64
 kernel=
 image=
+mem=1024
+qemu="qemu-system-aarch64"
+smp=4
 
 while [ $# -ne 0 ] ; do
 	case "${1}" in
@@ -44,9 +46,17 @@ while [ $# -ne 0 ] ; do
 			usage
 			exit
 			;;
+		-m|--mem)
+			shift
+			mem=${1}
+			;;
 		-q|--qemu)
 			shift
 			qemu=${1}
+			;;
+		-s|--smp)
+			shift
+			smp=${1}
 			;;
 		*)
 			if [ -z "${kernel}" ] ; then
@@ -91,8 +101,8 @@ qemu_opts=(
 	"-M" "virt"
 	"-accel" "tcg,thread=multi"
 	"-cpu" "cortex-a57"
-	"-m" "1024"
-	"-smp" "4"
+	"-m" "${mem}"
+	"-smp" "${smp}"
 	"-device" "VGA,edid=on,xres=800,yres=480"
 	"-device" "usb-ehci"
 	"-device" "usb-kbd"
