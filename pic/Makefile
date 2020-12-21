@@ -1,17 +1,13 @@
 FAMILY = pic14
 DEVICE = 16f88
+PIC = PIC16F88
 
-CC = sdcc
+SDCC ?= $(HOME)/Projects/tools/sdcc-3.9.0/bin/sdcc
+CC = $(SDCC)
 CFLAGS = --use-non-free -m$(FAMILY) -p$(DEVICE)
 
-PK2CMD ?= ~/Projects/tools/pk2cmd/bin/pk2cmd
-
-#SDCC_DIR = /usr/local/share/sdcc
-
-#LD = gplink
-#LDFLAGS = --use-shared --processor-mismatch --map \
-#	$(SDCC_DIR)/non-free/lib/$(FAMILY)/$(DEVICE).lib \
-#	$(SDCC_DIR)/lib/$(FAMILY)/libsdcc.lib
+PK2CMD ?= $(HOME)/Projects/tools/pk2cmd/bin/pk2cmd
+DO_PK2CMD = cd "$(dir $(PK2CMD))" && sudo "$(PK2CMD)"
 
 all: raspi-kidz.hex
 
@@ -22,4 +18,10 @@ clean:
 	rm -f *.asm *.cod *.hex *.lst *.o
 
 detect:
-	$(PK2CMD) -P
+	$(DO_PK2CMD) -P
+
+erase:
+	$(DO_PK2CMD) -P$(PIC) -E
+
+program: raspi-kidz.hex
+	$(DO_PK2CMD) -P$(PIC) -F$(PWD)/$< -M

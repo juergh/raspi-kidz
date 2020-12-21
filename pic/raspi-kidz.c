@@ -34,6 +34,16 @@ __code uint16_t __at (_CONFIG2) __config2 =
 
 #define SYS_ON			RA4
 #define SYS_ON_TRIS		TRISA4
+#define SYS_ON_ANS		ANS4
+
+#define RPI_MISC1		RB1
+#define RPI_MISC1_TRIS		TRISB1
+
+#define RPI_MISC2		RB2
+#define RPI_MISC2_TRIS		TRISB2
+
+#define RPI_MISC3		RB3
+#define RPI_MISC3_TRIS		TRISB3
 
 /* Helper macros */
 
@@ -50,24 +60,26 @@ __code uint16_t __at (_CONFIG2) __config2 =
 #define turn_backlight_off	(BL_EN = 1)
 
 /* System states */
-
 typedef enum {
-	RESET = 1,
+	RESET = 0,
 	OFF,
 	TURN_ON,
 	ON,
 	TURN_OFF,
 } system_state;
 
-
 /* Main entry point */
-
 void main(void)
 {
 	system_state state;
 
 	/* Configure the clock */
 	OSCCON = _IRCF0;  /* 125 kHz internal clock */
+
+	/* Configure the inputs */
+	RPI_UP_TRIS = 1;
+	SYS_ON_TRIS = 1;
+	SYS_ON_ANS = 0;
 
 	/* Configure the outputs */
 	RPI_PWR_EN_TRIS = 0;
@@ -108,7 +120,7 @@ void main(void)
 			} else if (rpi_is_down) {
 				/* The Pi is shut down */
 				turn_backlight_off;
-				turn_sytem_off;
+				turn_rpi_off;
 				state = OFF;
 			}
 			break;
@@ -119,7 +131,7 @@ void main(void)
 				state = ON;
 			} else if (rpi_is_down) {
 				/* The Pi is shut down */
-				turn_pi_off;
+				turn_rpi_off;
 				state = OFF;
 			}
 			break;
