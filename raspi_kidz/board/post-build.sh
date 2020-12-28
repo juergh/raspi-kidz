@@ -28,3 +28,18 @@ cat << __EOF__ >> "${conf}"
 /dev/mmcblk0p1   /boot   vfat   defaults   0   2
 # [post-build]
 __EOF__
+
+#
+# Generate /etc/wpa_supplicant.conf
+#
+
+conf="${TARGET_DIR}"/etc/wpa_supplicant.conf
+cat << EOF > "${conf}"
+# [post-build]
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+country=CH
+EOF
+ssid=$(pass show local/wifi | grep '^ssid: ' | sed 's/^ssid: //')
+pass=$(pass show local/wifi | grep '^passphrase: ' | sed 's/^passphrase: //')
+wpa_passphrase "${ssid}" "${pass}" | sed '/#psk/d' >> "${conf}"

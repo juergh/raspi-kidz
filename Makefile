@@ -17,8 +17,6 @@ KERNEL_IMG := $(KERNEL_DIR)/arch/arm64/boot/Image
 NUM_CPUS := $(shell getconf _NPROCESSORS_ONLN)
 KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
 
-WPA_SUPPLICANT_CONF := raspi_kidz/board/rootfs-overlay/etc/wpa_supplicant.conf
-
 # ----------------------------------------------------------------------------
 # Build targets
 
@@ -60,18 +58,10 @@ qemu: $(KERNEL_IMG)
 	./qemu-raspi --mem 512 --smp 4 $(KERNEL_IMG) \
 	    $(BR2_DIR)/output/images/sdcard.img
 
-$(WPA_SUPPLICANT_CONF):
-	cp raspi_kidz/board/wpa_supplicant.conf.in $@
-	@ssid="$(shell pass show local/wifi | grep '^ssid: ' | \
-	               sed 's/^ssid: //')" ; \
-	pass="$(shell pass show local/wifi | grep '^passphrase: ' | \
-	              sed 's/^passphrase: //')" ; \
-	wpa_passphrase "$${ssid}" "$${pass}" | sed '/#psk/d' >> $@
-
 # ----------------------------------------------------------------------------
 # Buildroot targets
 
-all: $(WPA_SUPPLICANT_CONF)
+all:
 	$(BR2_MAKE) $@
 
 menuconfig:
@@ -81,7 +71,6 @@ menuconfig:
 
 clean:
 	$(BR2_MAKE) $@
-	rm -f $(WPA_SUPPLICANT_CONF)
 
 %:
 	$(BR2_MAKE) $@
