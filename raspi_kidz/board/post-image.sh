@@ -15,7 +15,8 @@ __EOF__
 # Fixup /boot/config.txt
 #
 
-sed -i -e '/^# \[post-image\]$/,$d' "${BINARIES_DIR}"/rpi-firmware/config.txt
+sed -i -e '/^# \[post-image\]$/,/^# \[post-image\]$/d' \
+	"${BINARIES_DIR}"/rpi-firmware/config.txt
 cat << __EOF__ >> "${BINARIES_DIR}"/rpi-firmware/config.txt
 # [post-image]
 
@@ -36,4 +37,5 @@ hdmi_drive=1
 dtparam=ic2_arm=on
 dtparam=spi=on
 dtoverlay=ads7846,cs=1,penirq=25,penirq_pull=2,speed=50000,keep_vref_on=0,swapxy=0,pmax=255,xohms=150,xmin=200,xmax=3900,ymin=200,ymax=3900
+# [post-image]
 __EOF__
