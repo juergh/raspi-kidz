@@ -1,0 +1,87 @@
+#!/bin/sh -eu
+#
+# Simple daemon that interracts with the raspi-kidz PIC
+#
+
+GPIO_CHIP=gpiochip0
+SYS_ON=11
+RPI_UP=26
+
+out()
+{
+	rc=${?}
+
+	if [ ${rc} -eq 0 ] ; then
+		echo "Daemon terminated"
+	else
+		echo "Error: Daemon terminated unexpectedly" >&2
+	fi
+}
+
+main()
+{
+	trap out EXIT TERM
+
+	# Drive RPI_UP high to signal that we're up
+	if gpioset -b -m signal "${GPIO_CHIP}" "${RPI_UP}"=1 ; then
+		echo "RPI_UP = 1"
+	else
+		echo "Warning: Unable to set RPI_UP = 1"
+	fi
+
+	# Read SYS_ON and verify it's high
+	sys_on=$(gpioget "${GPIO_CHIP}" "${SYS_ON}" || echo "FAIL ${?}")
+	if [ "${sys_on% *}" = "FAIL" ] ; then
+		echo "Error: Unable to get SYS_ON (rc ${sys_on#* })" >&2
+		exit 1
+	fi
+	if [ "${sys_on}" = "1" ] ; then
+		echo "SYS_ON = 1"
+	else
+		echo "Warning: SYS_ON != 1 (${sys_on})"
+	fi
+
+	echo "Daemon running (pid $$)"
+
+	start=$(date +%s)
+	prev_sys_on=${sys_on}
+	while true ; do
+		now=$(date +%s)
+		sys_on=$(gpioget "${GPIO_CHIP}" "${SYS_ON}" || echo "x")
+
+		state=${prev_sys_on}${sys_on}
+		case "${state}" in
+			00)
+				if [ "${now}" -gt "$((start + 5 * 60))" ] ; then
+					echo "Timed out, shutting down"
+					shutdown -h now
+				fi
+				;;
+			01)
+				# Rising edge
+				echo "SYS_ON = 1"
+				start=${now}
+				;;
+			10)
+				# Falling edge
+				echo "SYS_ON = 0"
+				start=${now}
+				;;
+			11)
+				start=${now}
+				;;
+			*)
+				echo "Error: Invalid state: ${state}" >&2
+				exit 1
+				;;
+		esac
+
+		prev_sys_on=${sys_on}
+		sleep 1
+	done
+
+	exit 0
+}
+
+# Double fork
+( main & ) &

@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# [rootfs-overlay] Start the gpiod daemon
+#
+
+case "$1" in
+	start)
+		printf "Starting gpiod daemon: "
+		/usr/bin/gpiod
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+esac
+
+exit $?
