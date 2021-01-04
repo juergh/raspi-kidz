@@ -54,7 +54,7 @@ main()
 			00)
 				if [ "${now}" -gt "$((start + 5 * 60))" ] ; then
 					echo "Timed out, shutting down"
-					shutdown -h now
+					poweroff
 				fi
 				;;
 			01)
