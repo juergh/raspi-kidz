@@ -1,20 +1,17 @@
 #!/bin/sh
 
+set -u
 set -e
 
 #
 # Fixup /etc/initab
 #
 
+# Clear any gettys and put a login on /dev/console
 conf="${TARGET_DIR}"/etc/inittab
-sed -i -e '/^console::/d' -e '/^tty1::/d' "${conf}"
-sed -i -e '/^# \[post-build\]$/,/^# \[post-build\]$/d' "${conf}"
+sed -i '/::respawn:/d' "${conf}"
 cat << __EOF__ >> "${conf}"
-# [post-build]
-# tty1::respawn:/sbin/getty -L tty1 0 vt100 # HDMI console
-tty1::respawn:/bin/login -f admin
-console::respawn:/bin/login -f admin
-# [post-build]
+::respawn:/bin/login -f admin
 __EOF__
 
 #
@@ -36,7 +33,6 @@ __EOF__
 if [ -n "${WIFI_SSID}" ] && [ -n "${WIFI_PASS}" ] ; then
 	conf="${TARGET_DIR}"/etc/wpa_supplicant.conf
 	cat << EOF > "${conf}"
-# [post-build]
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=CH
