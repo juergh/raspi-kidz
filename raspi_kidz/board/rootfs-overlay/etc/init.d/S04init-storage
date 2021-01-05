@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# Initialize and mount the storage partition
+#
+
+for x in $(cat /proc/cmdline) ; do
+    case "${x}" in
+        root=*)
+            root_part=${x#root=}
+			break
+            ;;
+    esac
+done
+
+case "${root_part}" in
+	*[0-9]p2)
+		root=${root_part%p2}
+		storage_part=${root}p3
+		;;
+	*)
+		root=${root_part%2}
+		storage_part=${root}3
+		;;
+esac
+
+if ! blkid | grep -q 'LABEL="storage"' ; then
+	root_size=$(cat "/sys/block/${root##*/}/size")
+	root_end=$((root_size - 1))
+
+	printf "Resizing storage partition: "
+	result="OK"
+	if ! parted -m "${root}" u s resizepart 3 "${root_end}" ; then
+		result="FAIL"
+	fi
+	echo "${result}"
+
+	printf "Creating storage filesystem: "
+	result="OK"
+	if ! mkfs.ext4 -L storage "${storage_part}" ; then
+		result="FAIL"
+	fi
+	echo "${result}"
+fi
+
+printf "Mounting storage partition: "
+mkdir -p /storage
+result="OK"
+if ! mount -o ro "${storage_part}" /storage ; then
+	result="FAIL"
+fi
+echo "${result}"
