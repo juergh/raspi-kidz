@@ -69,13 +69,10 @@ all:
 
 menuconfig:
 	$(MAKE) defconfig
-	$(BR2_MAKE) $@
+	$(BR2_MAKE) menuconfig
 	$(MAKE) savedefconfig
-
-clean:
-	$(BR2_MAKE) $@
 
 %:
 	$(BR2_MAKE) $@
 
-.PHONY: default defconfig deepclean qemu
+.PHONY: default defconfig deepclean qemu all menuconfig
