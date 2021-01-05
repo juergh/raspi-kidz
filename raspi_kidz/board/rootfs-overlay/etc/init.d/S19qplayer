@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# RASPI-KIDZ
+# Start qplayer
+#
+
+case "$1" in
+	start)
+		printf "Starting qplayer: "
+		( /usr/bin/qplayer -platform linuxfb 2>&1 | logger -s -t qplayer & ) &
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+esac
+
+exit $?
