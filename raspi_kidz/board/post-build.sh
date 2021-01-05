@@ -39,3 +39,9 @@ country=CH
 EOF
 	wpa_passphrase "${WIFI_SSID}" "${WIFI_PASS}" | sed '/#psk/d' >> "${conf}"
 fi
+
+#
+# Pre-generate SSH host keys
+#
+
+ssh-keygen -A -f "${TARGET_DIR}"
