@@ -1,4 +1,7 @@
-# [overlay] network interfaces file
+#
+# RASPI-KIDZ
+# Network interfaces file
+#
 
 auto lo
 iface lo inet loopback

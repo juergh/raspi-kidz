@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# RASPI-KIDZ
+# Pre-init script to setup the root filesystem overlay
+#
 
 echo "-- Running overlay-init"
 
@@ -38,7 +42,7 @@ pivot_root . tmp
 exec chroot . sh -c "
 # Remove the root device from the new root's fstab
 awk '\$2 != \"/\" { print \$0 }' /etc/fstab > /etc/fstab.new
-#mv /etc/fstab.new /etc/fstab
+mv /etc/fstab.new /etc/fstab
 
 # Create the overlay mountpoints for the new root
 mkdir /media/root-ro

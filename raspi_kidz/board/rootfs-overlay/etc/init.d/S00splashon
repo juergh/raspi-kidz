@@ -1,6 +1,7 @@
 #!/bin/sh
 #
-# [rootfs-overlay] Display a splash image on poweron
+# RASPI-KIDZ
+# Display a splash image on poweron
 #
 
 SPLASH_IMAGE_POWERON=/var/lib/splash/poweron.png

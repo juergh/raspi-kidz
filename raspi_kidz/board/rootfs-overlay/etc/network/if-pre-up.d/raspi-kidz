@@ -1,6 +1,7 @@
 #!/bin/sh
 #
-# [rootfs-overlay] Handle eth0 and wlan0 interfaces (pre-up)
+# RASPI-KIDZ
+# Handle eth0 and wlan0 interfaces (pre-up)
 #
 
 if [ "$IFACE" = "eth0" ] ; then

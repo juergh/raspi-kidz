@@ -1,6 +1,7 @@
 #!/bin/sh
 #
-# [rootfs-overlay] Display a splash image on poweroff
+# RASPI-KIDZ
+# Display a splash image on poweroff
 #
 
 SPLASH_IMAGE_POWEROFF=/var/lib/splash/poweroff.png

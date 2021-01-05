@@ -1,1 +1,5 @@
+#
+# RASPI-KIDZ
+#
+
 admin ALL = NOPASSWD: ALL

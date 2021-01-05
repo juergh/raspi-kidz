@@ -1,5 +1,6 @@
 #!/bin/sh -eu
 #
+# RASPI-KIDZ
 # Simple daemon that interracts with the raspi-kidz PIC
 #
 

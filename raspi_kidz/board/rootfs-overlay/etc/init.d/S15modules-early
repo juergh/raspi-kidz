@@ -1,6 +1,7 @@
 #!/bin/sh
 #
-# [rootfs-overlay] Load modules (early)
+# RASPI-KIDZ
+# Load modules (early)
 #
 
 STAGE=early
