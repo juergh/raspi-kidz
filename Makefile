@@ -61,8 +61,11 @@ qemu: $(KERNEL_IMG)
 # ----------------------------------------------------------------------------
 # Buildroot targets
 
+all: WIFI_SSID ?= $(shell pass show local/wifi | grep '^ssid: ' | sed 's/^ssid: //')
+all: WIFI_PASS ?= $(shell pass show local/wifi | grep '^passphrase: ' | sed 's/^passphrase: //')
 all:
-	$(BR2_MAKE) $@
+	@WIFI_SSID="$(WIFI_SSID)" WIFI_PASS="$(WIFI_PASS)" $(BR2_MAKE) all
+	rm -f $(BR2_DIR)/output/target/etc/wpa_supplicant.conf
 
 menuconfig:
 	$(MAKE) defconfig

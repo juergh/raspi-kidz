@@ -33,17 +33,13 @@ __EOF__
 # Generate /etc/wpa_supplicant.conf
 #
 
-conf="${TARGET_DIR}"/etc/wpa_supplicant.conf
-cat << EOF > "${conf}"
+if [ -n "${WIFI_SSID}" ] && [ -n "${WIFI_PASS}" ] ; then
+	conf="${TARGET_DIR}"/etc/wpa_supplicant.conf
+	cat << EOF > "${conf}"
 # [post-build]
 ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=CH
 EOF
-if [ -z "${SSID:-}" ] ; then
-	SSID=$(pass show local/wifi | grep '^ssid: ' | sed 's/^ssid: //')
+	wpa_passphrase "${WIFI_SSID}" "${WIFI_PASS}" | sed '/#psk/d' >> "${conf}"
 fi
-if [ -z "${PASS:-}" ] ; then
-	PASS=$(pass show local/wifi | grep '^passphrase: ' | sed 's/^passphrase: //')
-fi
-wpa_passphrase "${SSID}" "${PASS}" | sed '/#psk/d' >> "${conf}"
