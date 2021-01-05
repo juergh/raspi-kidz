@@ -1,0 +1,59 @@
+#!/bin/sh
+
+echo "-- Running overlay-init"
+
+mount -t proc proc /proc
+
+for x in $(cat /proc/cmdline) ; do
+	case "${x}" in
+		root=*)
+			root=${x#root=}
+			;;
+	esac
+done
+echo "-- Root device: ${root}"
+
+# Load the overlayfs kernel module
+modprobe overlay
+
+# Mount the root disk (lowerdir)
+mount -t tmpfs tmpfs /media
+mkdir /media/root-ro
+mount -t ext4 -o ro,noauto "${root}" /media/root-ro
+
+# Create a tmpfs for the upperdir and workdir
+mkdir /media/root-rw
+mount -t tmpfs tmpfs-root /media/root-rw
+mkdir /media/root-rw/overlay
+mkdir /media/root-rw/overlay-work
+
+# Mount the overlayfs
+mkdir /media/new-root
+mount -t overlay -o lowerdir=/media/root-ro,upperdir=/media/root-rw/overlay,workdir=/media/root-rw/overlay-work overlay-root /media/new-root
+
+# Pivot to the new root, cleanup the mounts and call the regular init
+echo "-- Pivot to new overlay root"
+cd /media/new-root
+pivot_root . tmp
+exec chroot . sh -c "
+# Remove the root device from the new root's fstab
+awk '\$2 != \"/\" { print \$0 }' /etc/fstab > /etc/fstab.new
+#mv /etc/fstab.new /etc/fstab
+
+# Create the overlay mountpoints for the new root
+mkdir /media/root-ro
+mkdir /media/root-rw
+
+# Move the mounts to the new root
+mount --move /tmp/media/root-ro /media/root-ro
+mount --move /tmp/media/root-rw /media/root-rw
+mount --move /tmp/dev /dev
+
+# Unmount the old root
+umount /tmp/media
+umount /tmp/proc
+umount /tmp
+
+# Continue with the regular init
+exec /sbin/init
+"
