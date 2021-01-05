@@ -1,12 +1,13 @@
 #!/bin/sh
 #
-# [rootfs-overlay] Start the gpiod daemon
+# RASPI-KIDZ
+# Start the gpiod daemon
 #
 
 case "$1" in
 	start)
 		printf "Starting gpiod daemon: "
-		/usr/bin/gpiod
+		( /usr/bin/gpiod 2>&1 | logger -s -t gpiod & ) &
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
 		;;
 esac
