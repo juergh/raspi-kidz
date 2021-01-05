@@ -7,9 +7,9 @@ set -e
 #
 
 cat << __EOF__ > "${BINARIES_DIR}"/rpi-firmware/cmdline.txt
-root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyAMA0,115200 init=/sbin/overlay-init
+root=/dev/mmcblk0p2 rootwait console=tty1 console=ttyS0,115200 init=/sbin/overlay-init
 __EOF__
-#root=/dev/mmcblk0p2 rootwait console=ttyAMA0,115200 logo.nologo vt.global_cursor_default=0
+#root=/dev/mmcblk0p2 rootwait console=ttyS0,115200 logo.nologo vt.global_cursor_default=0
 
 #
 # Fixup /boot/config.txt
