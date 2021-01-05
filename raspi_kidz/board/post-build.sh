@@ -40,6 +40,10 @@ ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=CH
 EOF
-ssid=$(pass show local/wifi | grep '^ssid: ' | sed 's/^ssid: //')
-pass=$(pass show local/wifi | grep '^passphrase: ' | sed 's/^passphrase: //')
-wpa_passphrase "${ssid}" "${pass}" | sed '/#psk/d' >> "${conf}"
+if [ -z "${SSID:-}" ] ; then
+	SSID=$(pass show local/wifi | grep '^ssid: ' | sed 's/^ssid: //')
+fi
+if [ -z "${PASS:-}" ] ; then
+	PASS=$(pass show local/wifi | grep '^passphrase: ' | sed 's/^passphrase: //')
+fi
+wpa_passphrase "${SSID}" "${PASS}" | sed '/#psk/d' >> "${conf}"
