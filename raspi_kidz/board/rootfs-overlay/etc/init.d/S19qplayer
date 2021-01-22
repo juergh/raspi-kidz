@@ -1,13 +1,18 @@
 #!/bin/sh
 #
 # RASPI-KIDZ
-# Start qplayer
+# Start/stop qplayer
 #
 
 case "$1" in
 	start)
 		printf "Starting qplayer: "
-		( /usr/bin/qplayer -platform linuxfb 2>&1 | logger -s -t qplayer & ) &
+		( /usr/bin/qplayer -platform linuxfb 2>&1 | logger -t qplayer & ) &
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	stop)
+		printf "Stopping qplayer: "
+		killall /usr/bin/qplayer
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
 		;;
 esac
