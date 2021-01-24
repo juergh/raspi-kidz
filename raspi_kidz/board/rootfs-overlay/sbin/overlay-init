@@ -6,15 +6,12 @@
 
 echo "-- Running overlay-init"
 
-mount -t proc proc /proc
-
-for x in $(cat /proc/cmdline) ; do
-	case "${x}" in
-		root=*)
-			root=${x#root=}
-			;;
-	esac
-done
+# Determine the root device
+if [ -b /dev/mmcblk0 ] ; then
+	root=/dev/mmcblk0p2
+else
+	root=/dev/vda2
+fi
 echo "-- Root device: ${root}"
 
 # Load the overlayfs kernel module
