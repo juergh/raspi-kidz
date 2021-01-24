@@ -98,7 +98,7 @@ trap out EXIT INT TERM HUP
 # Create a temporary disk image using the provided image file as a backing
 # file, so that we don't modify the original image
 tmp_image="${TMPDIR}/disk.qcow2"
-qemu-img create -f qcow2 -b "${image}" "${tmp_image}" 4G
+qemu-img create -f qcow2 -b "${image}" "${tmp_image}" 1G
 
 # Assemble the qemu command and options
 qemu_opts=(
