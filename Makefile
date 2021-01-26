@@ -58,6 +58,10 @@ qemu: $(KERNEL_IMG)
 	./qemu-raspi --mem 512 --smp 4 $(KERNEL_IMG) \
 	    $(BR2_DIR)/output/images/sdcard.img
 
+qemu-initrd: $(KERNEL_IMG)
+	./qemu-raspi --initrd $(BR2_DIR)/output/images/initrd.img --mem 512 \
+	    --smp 4 $(KERNEL_IMG) $(BR2_DIR)/output/images/sdcard.img
+
 # ----------------------------------------------------------------------------
 # Buildroot targets
 

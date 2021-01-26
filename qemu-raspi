@@ -21,16 +21,17 @@ function out()
 function usage()
 {
     cat <<EOF
-Usage: qemu-raspi [-h] [-q QEMU] KERNEL IMAGE
+Usage: qemu-raspi [-h] [-i INITRD] [-q QEMU] KERNEL IMAGE
 
 Positional arguments:
-  KERNEL           The kernel to use for booting the image.
-  IMAGE            The image file containing the OS to run.
+  KERNEL               The kernel to use for booting the image.
+  IMAGE                The image file containing the OS to run.
 
 Optional arguments:
-  -h, --help       Show this help text and exit.
-  -q, --qemu QEMU  Use the QEMU binary QEMU rather than
-                   /usr/bin/qemu-system-aarch64.
+  -h, --help           Show this help text and exit.
+  -i, --initrd INITRD  Use the provided initrd INITRD image.
+  -q, --qemu QEMU      Use the QEMU binary QEMU rather than
+                       /usr/bin/qemu-system-aarch64.
 EOF
 }
 
@@ -39,12 +40,17 @@ image=
 mem=1024
 qemu="qemu-system-aarch64"
 smp=4
+initrd=
 
 while [ $# -ne 0 ] ; do
 	case "${1}" in
 		-h|--help)
 			usage
 			exit
+			;;
+		-i|--initrd)
+			shift
+			initrd=${1}
 			;;
 		-m|--mem)
 			shift
@@ -115,9 +121,19 @@ qemu_opts=(
 	"-device" "virtio-net-pci,netdev=net0"
 	"-netdev" "user,id=net0,hostfwd=tcp::5022-:22"
 	"-kernel" "${kernel}"
-	"-append" "root=/dev/vda2 rootwait console=ttyAMA0 logo.nologo vt.global_cursor_default=0 init=/sbin/overlay-init"
 	"-drive" "file=${tmp_image},format=qcow2"
 )
+
+if [ -n "${initrd}" ] ; then
+	qemu_opts+=(
+		"-initrd" "${initrd}"
+		"-append" "console=ttyAMA0 logo.nologo"
+	)
+else
+	qemu_opts+=(
+		"-append" "root=/dev/vda2 rootwait console=ttyAMA0 logo.nologo vt.global_cursor_default=0 init=/sbin/overlay-init"
+	)
+fi
 
 echo
 echo "${qemu} ${qemu_opts[*]}"
