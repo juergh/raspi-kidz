@@ -1,0 +1,68 @@
+#!/bin/sh -eu
+#
+# Download a raspi-kidz image and prepare it for update
+#
+
+IMAGE_URL=http://192.168.99.11/images/raspi-kidz/sdcard.img
+
+extract_partition()
+{
+	_image=${1} _partnum=${2}
+
+	_part=$(partx -o START,SECTORS -g -n "${_partnum}" "${_image}" | \
+				sed -e 's/^\s*//' -e 's/\s*$//')
+	_start=${_part%% *}
+	_sectors=${_part##* }
+
+	dd if="${_image}" bs=512 skip="${_start}" count="${_sectors}"
+}
+
+if [ "$(id -u)" -ne 0 ] ; then
+	echo "This script needs to be run as root" >&2
+	exit 1
+fi
+
+if ! [ -d /storage ] ; then
+	echo "No such directory: /storage" >&2
+	exit 1
+fi
+
+if [ -b /dev/mmcblk0 ] ; then
+	boot=/dev/mmcblk0p1
+	storage=/dev/mmcblk0p3
+else
+	boot=/dev/vda1
+	storage=/dev/vda3
+fi
+
+# Remount the storage partition read-write
+mount -o remount,rw "${storage}" /storage
+cd /storage
+
+# Download the image
+echo "-- Download image"
+wget -O image.img "${IMAGE_URL}"
+
+# Extract the boot partition
+echo "-- Extract boot partition ..."
+extract_partition image.img 1 > boot.img
+
+# Extract the root partition
+echo "-- Extract root partition ..."
+extract_partition image.img 2 > root.img
+
+# Cleanup
+rm -f image.img
+
+# Remount the storage partition read-only
+cd /
+mount -o remount,ro "${storage}" /storage
+
+# Modify config.txt and cmdline.txt
+mount "${boot}" /boot
+echo "initramfs initrd.img 0" >> /boot/config.txt
+echo "" > /boot/cmdline.txt
+umount /boot
+
+# Reboot to perform the update
+reboot
