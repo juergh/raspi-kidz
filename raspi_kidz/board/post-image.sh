@@ -41,6 +41,48 @@ dtoverlay=ads7846,cs=1,penirq=25,penirq_pull=2,speed=50000,keep_vref_on=0,swapxy
 __EOF__
 
 #
+# Create the updater initrd
+#
+
+initrd_dir=$(mktemp -d)
+
+# Create /init
+cat <<EOF > "${initrd_dir}"/init
+#!/bin/busybox sh
+
+/bin/busybox --install /bin
+
+[ -d /dev ] || mkdir -m 0755 /dev
+mount -t devtmpfs devtmpfs /dev
+
+[ -d /storage ] || mkdir /storage
+mount /dev/mmcblk0p3 /storage
+dd conv=fsync bs=512 if=/storage/boot.img of=/dev/mmcblk0p1
+dd conv=fsync bs=512 if=/storage/root.img of=/dev/mmcblk0p2
+umount /storage
+
+sync
+reboot -f
+EOF
+chmod 755 "${initrd_dir}"/init
+
+# Install busybox
+mkdir -p "${initrd_dir}"/bin
+cp "${TARGET_DIR}"/bin/busybox "${initrd_dir}"/bin
+
+# Install libc and ld
+mkdir -p "${initrd_dir}"/lib
+cp -dp "${TARGET_DIR}"/lib/libc.* "${TARGET_DIR}"/lib/libuClibc-* "${TARGET_DIR}"/lib/ld-* "${initrd_dir}"/lib
+ln -s lib "${initrd_dir}"/lib32
+
+# Create the initrd image
+( cd "${initrd_dir}" && \
+  find . | cpio -H newc -o | gzip -9 > "${BINARIES_DIR}"/initrd.img )
+
+# Cleanup
+rm -rf "${initrd_dir}"
+
+#
 # Generate the image (copied from buildroot/board/raspberrypi3/post-image.sh)
 #
 
