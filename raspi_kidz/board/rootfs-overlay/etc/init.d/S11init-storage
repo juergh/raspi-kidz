@@ -27,7 +27,7 @@ case "$1" in
 
 			printf "Creating storage filesystem: "
 			result="OK"
-			if ! mkfs.ext4 -L storage "${storage}" ; then
+			if ! mkfs.ext4 -F -L storage "${storage}" ; then
 				result="FAIL"
 			fi
 			echo "${result}"
