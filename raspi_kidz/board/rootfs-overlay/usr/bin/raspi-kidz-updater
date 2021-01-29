@@ -60,7 +60,7 @@ mount -o remount,ro "${storage}" /storage
 
 # Modify config.txt and cmdline.txt
 mount "${boot}" /boot
-echo "initramfs initrd.img 0" >> /boot/config.txt
+echo "initramfs initrd.img" >> /boot/config.txt
 echo "" > /boot/cmdline.txt
 umount /boot
 
