@@ -9,8 +9,9 @@ set -e
 
 conf=${BINARIES_DIR}/rpi-firmware/cmdline.txt
 cat << __EOF__ > "${conf}"
-root=/dev/mmcblk0p2 rootwait console=ttyS0,115200 vt.global_cursor_default=0 init=/sbin/overlay-init
+root=/dev/mmcblk0p2 rootwait console=ttyS0,115200 logo.nologo vt.global_cursor_default=0 init=/sbin/overlay-init
 __EOF__
+#
 
 #
 # Fixup /boot/config.txt
@@ -44,24 +45,47 @@ __EOF__
 # Create the updater initrd
 #
 
-initrd_dir=$(mktemp -d)
+initrd_dir="${BINARIES_DIR}"/initrd.d
+rm -rf "${initrd_dir}"
+mkdir "${initrd_dir}"
 
 # Create /init
 cat <<EOF > "${initrd_dir}"/init
 #!/bin/busybox sh
 
+wait_dev()
+{
+    echo "-- Waiting for \$1 ..."
+    while true ; do
+        [ -b "\$1" ] && return
+        sleep 1
+    done
+}
+
 /bin/busybox --install /bin
 
 [ -d /dev ] || mkdir -m 0755 /dev
+[ -d /proc ] || mkdir /proc
 mount -t devtmpfs devtmpfs /dev
+mount -t proc proc /proc
+
+wait_dev /dev/mmcblk0p1
+wait_dev /dev/mmcblk0p2
+wait_dev /dev/mmcblk0p3
 
 [ -d /storage ] || mkdir /storage
 mount /dev/mmcblk0p3 /storage
-dd conv=fsync bs=512 if=/storage/boot.img of=/dev/mmcblk0p1
-dd conv=fsync bs=512 if=/storage/root.img of=/dev/mmcblk0p2
-umount /storage
 
+echo "-- Flashing boot.img ..."
+dd conv=fsync bs=512 if=/storage/boot.img of=/dev/mmcblk0p1
+
+echo "-- Flashing root.img ..."
+dd conv=fsync bs=512 if=/storage/root.img of=/dev/mmcblk0p2
+
+umount /storage
 sync
+
+echo "Rebooting ..."
 reboot -f
 EOF
 chmod 755 "${initrd_dir}"/init
@@ -78,9 +102,6 @@ ln -s lib "${initrd_dir}"/lib32
 # Create the initrd image
 ( cd "${initrd_dir}" && \
   find . | cpio -H newc -o | gzip -9 > "${BINARIES_DIR}"/initrd.img )
-
-# Cleanup
-rm -rf "${initrd_dir}"
 
 #
 # Generate the image (copied from buildroot/board/raspberrypi3/post-image.sh)
