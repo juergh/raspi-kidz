@@ -15,18 +15,6 @@ cat << __EOF__ >> "${conf}"
 __EOF__
 
 #
-# Fixup /etc/fstab
-#
-
-#conf="${TARGET_DIR}"/etc/fstab
-#sed -i -e '/^# \[post-build\]$/,/^# \[post-build\]$/d' "${conf}"
-#cat << __EOF__ >> "${conf}"
-## [post-build]
-#/dev/mmcblk0p1   /boot   vfat   defaults   0   2
-## [post-build]
-#__EOF__
-
-#
 # Generate /etc/wpa_supplicant.conf
 #
 
