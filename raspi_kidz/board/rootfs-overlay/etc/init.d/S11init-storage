@@ -8,26 +8,29 @@ case "$1" in
 	start)
 		if [ -b /dev/mmcblk0 ] ; then
 			dev=/dev/mmcblk0
-			storage=/dev/mmcblk0p3
+			part3=/dev/mmcblk0p3
 		else
 			dev=/dev/vda
-			storage=/dev/vda3
+			part3=/dev/vda3
 		fi
 
-		if ! blkid | grep -q 'LABEL="storage"' ; then
-			dev_size=$(cat "/sys/block/${dev##*/}/size")
-			dev_end=$((dev_size - 1))
-
-			printf "Resizing storage partition: "
+		if ! [ -b "${part3}" ] ; then
+			printf "Creating storage partition: "
 			result="OK"
-			if ! parted -m "${dev}" u s resizepart 3 "${dev_end}" ; then
+
+			part2_end=$(partx -s -g -o END -n 2 "${dev}")
+			part3_start=$((part2_end + 1))
+
+			dev_size=$(cat "/sys/block/${dev##*/}/size")
+			part3_end=$((dev_size - 1))
+
+			if ! parted -s "${dev}" mkpart primary "${part3_start}"s "${part3_end}"s ; then
 				result="FAIL"
 			fi
-			echo "${result}"
 
 			printf "Creating storage filesystem: "
 			result="OK"
-			if ! mkfs.ext4 -F -L storage "${storage}" ; then
+			if ! mkfs.ext4 -F -L storage "${part3}" ; then
 				result="FAIL"
 			fi
 			echo "${result}"
@@ -36,7 +39,7 @@ case "$1" in
 		printf "Mounting storage partition: "
 		mkdir -p /storage
 		result="OK"
-		if ! mount -o ro "${storage}" /storage ; then
+		if ! mount -o ro "${part3}" /storage ; then
 			result="FAIL"
 		fi
 		echo "${result}"
