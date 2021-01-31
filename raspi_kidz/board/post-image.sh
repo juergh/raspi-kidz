@@ -81,10 +81,11 @@ mount -t proc proc /proc
 wait_dev /dev/mmcblk0p1
 wait_dev /dev/mmcblk0p2
 wait_dev /dev/mmcblk0p3
-sleep 2
 
 [ -d /storage ] || mkdir /storage
+sleep 2
 mount /dev/mmcblk0p3 /storage
+sleep 2
 
 echo "-- Flashing boot.img ..."
 dd conv=fsync bs=512 if=/storage/boot.img of=/dev/mmcblk0p1
@@ -96,6 +97,7 @@ umount /storage
 sync
 
 echo "Rebooting ..."
+sleep 1
 reboot -f
 EOF
 chmod 755 "${initrd_dir}"/init
