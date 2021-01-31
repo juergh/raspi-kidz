@@ -21,8 +21,5 @@ if [ "$IFACE" = "wlan0" ] ; then
 	[ -e /sys/class/net/wlan0 ] || exit 1
 
 	# Run wpa_supplicant
-	if ! [ -e /var/run/wpa_supplicant.pid ] ; then
-		/usr/sbin/wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf \
-								 -P /var/run/wpa_supplicant.pid || exit 1
-	fi
+	/usr/sbin/wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf || exit 1
 fi
