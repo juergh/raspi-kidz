@@ -53,6 +53,12 @@ mkdir "${initrd_dir}"
 cat <<EOF > "${initrd_dir}"/init
 #!/bin/busybox sh
 
+emergency()
+{
+    echo "-- Dropping into an emergency shell ..."
+    /bin/sh
+}
+
 wait_dev()
 {
     echo "-- Waiting for \$1 ..."
@@ -64,6 +70,9 @@ wait_dev()
 
 /bin/busybox --install /bin
 
+set -e
+trap emergency EXIT
+
 [ -d /dev ] || mkdir -m 0755 /dev
 [ -d /proc ] || mkdir /proc
 mount -t devtmpfs devtmpfs /dev
@@ -72,6 +81,7 @@ mount -t proc proc /proc
 wait_dev /dev/mmcblk0p1
 wait_dev /dev/mmcblk0p2
 wait_dev /dev/mmcblk0p3
+sleep 2
 
 [ -d /storage ] || mkdir /storage
 mount /dev/mmcblk0p3 /storage
