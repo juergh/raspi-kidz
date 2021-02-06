@@ -5,7 +5,7 @@
 #
 
 GPIO_CHIP=gpiochip0
-SYS_ON=11
+SYS_ON=5
 RPI_UP=26
 
 out()
