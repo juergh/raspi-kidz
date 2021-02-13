@@ -11,9 +11,10 @@ case "$1" in
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
 
 		printf "Starting qplayer: "
-		( /usr/bin/qplayer --platform linuxfb 2>&1 | logger -t qplayer & ) &
+		( LANG=en_US.UTF-8 /usr/bin/qplayer --platform linuxfb 2>&1 | logger -t qplayer & ) &
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
 		;;
+
 	stop)
 		printf "Stopping qplayer: "
 		killall /usr/bin/qplayer
