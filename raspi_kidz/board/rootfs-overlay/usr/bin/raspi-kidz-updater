@@ -65,6 +65,4 @@ echo "initramfs initrd.img" >> /boot/config.txt
 echo "console=tty1" > /boot/cmdline.txt
 umount /boot
 
-# Reboot to perform the update
-echo "-- Rebooting ..."
-reboot
+echo "You need to reboot to perform the actual update"
