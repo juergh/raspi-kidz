@@ -12,14 +12,23 @@ out()
 {
 	rc=${?}
 
+	trap - EXIT INT TERM
+
+	if [ -n "${SHUTDOWN_PID}" ] ; then
+		kill "${SHUTDOWN_PID}"
+	fi
+
 	if [ ${rc} -eq 0 ] ; then
 		echo "Daemon terminated"
 	else
 		echo "Error: Daemon terminated unexpectedly" >&2
 	fi
+
+	exit "${rc}"
 }
 
-trap out EXIT TERM
+SHUTDOWN_PID=
+trap out EXIT INT TERM
 
 # Drive RPI_UP high to signal that we're up
 if gpioset -b -m signal "${GPIO_CHIP}" "${RPI_UP}"=1 ; then
@@ -28,53 +37,27 @@ else
 	echo "Warning: Unable to set RPI_UP = 1"
 fi
 
-# Read SYS_ON and verify it's high
-sys_on=$(gpioget "${GPIO_CHIP}" "${SYS_ON}" || echo "FAIL ${?}")
-if [ "${sys_on% *}" = "FAIL" ] ; then
-	echo "Error: Unable to get SYS_ON (rc ${sys_on#* })" >&2
-	exit 1
-fi
-if [ "${sys_on}" = "1" ] ; then
-	echo "SYS_ON = 1"
-else
-	echo "Warning: SYS_ON != 1 (${sys_on})"
-fi
-
 echo "Daemon running (pid $$)"
 
-start=$(date +%s)
-prev_sys_on=${sys_on}
 while true ; do
-	now=$(date +%s)
-	sys_on=$(gpioget "${GPIO_CHIP}" "${SYS_ON}" || echo "x")
+	# Wait for a SYS_ON state change
+	gpiomon --num-events=1 "${GPIO_CHIP}" "${SYS_ON}" || true
 
-	state=${prev_sys_on}${sys_on}
-	case "${state}" in
-		00)
-			if [ "${now}" -gt "$((start + 5 * 60))" ] ; then
-				echo "Timed out, shutting down"
-				poweroff
+	sys_on=$(gpioget "${GPIO_CHIP}" "${SYS_ON}" || echo "x")
+	case "${sys_on}" in
+		0)
+			# Start the shutdown thread
+			if [ -z "${SHUTDOWN_PID}" ] ; then
+				/usr/bin/gpiod-shutdown 300 &
+				SHUTDOWN_PID=${!}
 			fi
 			;;
-		01)
-			# Rising edge
-			echo "SYS_ON = 1"
-			start=${now}
-			;;
-		10)
-			# Falling edge
-			echo "SYS_ON = 0"
-			start=${now}
-			;;
-		11)
-			start=${now}
-			;;
-		*)
-			echo "Error: Invalid state: ${state}" >&2
-			exit 1
+		1)
+			# Stop the shutdown thread
+			if [ -n "${SHUTDOWN_PID}" ] ; then
+				kill "${SHUTDOWN_PID}"
+				SHUTDOWN_PID=
+			fi
 			;;
 	esac
-
-	prev_sys_on=${sys_on}
-	sleep 1
 done

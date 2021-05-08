@@ -1,0 +1,25 @@
+#!/bin/sh -eu
+#
+# RASPI-KIDZ
+# Shutdown after x seconds
+#
+
+cancel_shutdown()
+{
+	trap - INT TERM
+	echo "Shutdown canceled"
+	kill "${SLEEP_PID}"
+	exit
+}
+
+timeout=${1}
+
+echo "Shutting down in ${timeout} seconds"
+
+sleep "${timeout}" &
+SLEEP_PID=${!}
+trap cancel_shutdown INT TERM
+wait
+
+echo "Timed out, shutting down"
+poweroff
