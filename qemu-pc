@@ -1,0 +1,106 @@
+#!/bin/bash -eu
+#
+# Run a PC OS image in QEMU
+#
+
+function out()
+{
+	local rc=${?}
+
+	trap - EXIT INT TERM HUP
+
+	rm -rf "${TMPDIR}"
+
+	if [ "${rc}" -ne 0 ] ; then
+		echo "Script failed" >&2
+	fi
+
+	exit "${rc}"
+}
+
+function usage()
+{
+    cat <<EOF
+Usage: qemu-pc [-h] IMAGE
+
+Positional arguments:
+  IMAGE                The image file containing the OS to run.
+
+Optional arguments:
+  -h, --help           Show this help text and exit.
+EOF
+}
+
+image=
+mem=1024
+smp=4
+
+while [ $# -ne 0 ] ; do
+	case "${1}" in
+		-h|--help)
+			usage
+			exit
+			;;
+		-m|--mem)
+			shift
+			mem=${1}
+			;;
+		-s|--smp)
+			shift
+			smp=${1}
+			;;
+		-*)
+			echo "Invalid argument: ${1}" >&2
+			exit 2
+			;;
+		*)
+			if [ -z "${image}" ] ; then
+				image=$(readlink -f "${1}")
+			else
+				echo "Invalid argument: ${1}" >&2
+				exit 2
+			fi
+			;;
+	esac
+	shift
+done
+
+if [ -z "${image}" ] ; then
+    usage >&2
+    exit 2
+fi
+
+if ! [ -f "${image}" ] ; then
+    echo "No such image file: ${image}" >&2
+    exit 1
+fi
+
+# Create a temporary directory and install an exit handler
+TMPDIR=$(mktemp -d --tmp qemu-pc-XXXXXX)
+trap out EXIT INT TERM HUP
+
+# Create a temporary disk image using the provided image file as a backing
+# file, so that we don't modify the original image
+tmp_image="${TMPDIR}/disk.qcow2"
+qemu-img create -f qcow2 -F raw -b "${image}" "${tmp_image}" 1G
+
+# Assemble the qemu command and options
+qemu_opts=(
+	"-M" "pc"
+	"-m" "${mem}"
+	"-smp" "${smp}"
+	"-device" "VGA,edid=on,xres=800,yres=480"
+	"-device" "usb-ehci"
+	"-device" "usb-kbd"
+	"-device" "ES1370"
+	"-device" "virtio-serial-pci"
+	"-device" "virtio-net-pci,netdev=net0"
+	"-netdev" "user,id=net0,hostfwd=tcp::5022-:22"
+	"-drive" "file=${tmp_image},format=qcow2"
+)
+
+echo
+echo "kvm ${qemu_opts[*]}"
+echo
+
+kvm "${qemu_opts[@]}"

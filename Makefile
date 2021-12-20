@@ -61,7 +61,12 @@ $(KERNEL_IMG): $(KERNEL_DIR)/Makefile
 	done ; \
 	$(KMAKE) -j$(NUM_CPUS) Image
 
-qemu: $(KERNEL_IMG)
+qemu: qemu-$(V)
+
+qemu-pc_kidz:
+	./qemu-pc --mem 4096 --smp 4 $(BR2_DIR)/output/images/disk.img
+
+qemu-raspi_kidz: $(KERNEL_IMG)
 	./qemu-raspi --mem 512 --smp 4 $(KERNEL_IMG) \
 	    $(BR2_DIR)/output/images/sdcard.img
 
