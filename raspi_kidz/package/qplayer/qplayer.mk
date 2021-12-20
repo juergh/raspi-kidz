@@ -5,7 +5,7 @@
 ################################################################################
 
 QPLAYER_VERSION = 0.1.0
-QPLAYER_SITE = ../../../qplayer
+QPLAYER_SITE = ../../../../qplayer
 QPLAYER_SITE_METHOD = local
 QPLAYER_DEPENDENCIES = qt5base
 
