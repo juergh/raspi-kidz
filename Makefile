@@ -1,11 +1,13 @@
 #!/bin/make
 
-BUILDD := $(PWD)/buildd
+V ?= raspi_kidz
+
+BUILDD := $(PWD)/buildd/$(V)
 
 BR2_DIR := $(BUILDD)/buildroot
-BR2_VERSION := 2020.11
+BR2_VERSION := 2021.08.2
 BR2_EXTERNAL := $(PWD)/raspi_kidz
-BR2_DEFCONFIG := raspi_kidz_defconfig
+BR2_DEFCONFIG := $(V)_defconfig
 BR2_MAKE := BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR)
 BR2_PATCHES_DIR := $(PWD)/patches/buildroot
 
