@@ -19,6 +19,10 @@ KERNEL_IMG := $(KERNEL_DIR)/arch/arm64/boot/Image
 NUM_CPUS := $(shell getconf _NPROCESSORS_ONLN)
 KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
 
+ifeq ($(wildcard raspi_kidz/configs/$(BR2_DEFCONFIG)),)
+  $(error "Invalid version: $(V)")
+endif
+
 # ----------------------------------------------------------------------------
 # Build targets
 
