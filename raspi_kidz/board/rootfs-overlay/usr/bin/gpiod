@@ -4,7 +4,6 @@
 # Simple daemon that interracts with the raspi-kidz PIC
 #
 
-GPIO_CHIP=gpiochip0
 SYS_ON=5
 RPI_UP=26
 
@@ -29,6 +28,13 @@ out()
 
 SHUTDOWN_PID=
 trap out EXIT INT TERM
+
+# Find the GPIO chip
+GPIO_CHIP=$(gpiodetect | awk '$2 == "[pinctrl-bcm2835]" { print $1 }')
+if [ -z "${GPIO_CHIP}" ] ; then
+	echo "Error: GPIO chip not found" >&2
+	exit 1
+fi
 
 # Drive RPI_UP high to signal that we're up
 if gpioset -b -m signal "${GPIO_CHIP}" "${RPI_UP}"=1 ; then
