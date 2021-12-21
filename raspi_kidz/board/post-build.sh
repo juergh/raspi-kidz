@@ -33,3 +33,23 @@ fi
 #
 
 ssh-keygen -A -f "${TARGET_DIR}"
+
+#
+# Fix grub
+#
+
+if [ -d "${TARGET_DIR}"/boot/grub ] ; then
+	# Use our own version of grub.cfg
+	cat <<EOF >"${TARGET_DIR}"/boot/grub/grub.cfg
+set default="0"
+set timeout="2"
+
+menuentry "Buildroot" {
+        linux /boot/bzImage root=/dev/sda1 rootwait console=ttyS0
+}
+EOF
+
+	 # Copy grub 1st stage to binaries, required for genimage
+    cp -f "${HOST_DIR}"/lib/grub/i386-pc/boot.img "${BINARIES_DIR}"
+
+fi
