@@ -1,6 +1,6 @@
 #!/bin/make
 
-V ?= raspi_kidz
+V ?= raspi-kidz
 
 BUILDD := $(PWD)/buildd/$(V)
 
@@ -65,7 +65,7 @@ qemu: qemu-$(V)
 qemu-pc-kidz:
 	./qemu-pc --mem 4096 --smp 4 $(BR2_DIR)/output/images/disk.img
 
-qemu-raspi_kidz: $(KERNEL_IMG)
+qemu-raspi-kidz: $(KERNEL_IMG)
 	./qemu-raspi --mem 512 --smp 4 $(KERNEL_IMG) \
 	    $(BR2_DIR)/output/images/sdcard.img
 
