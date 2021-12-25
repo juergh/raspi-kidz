@@ -1,68 +1,54 @@
 #!/bin/sh -eu
 #
-# Download a raspi-kidz image and prepare it for update
+# Download a raspi-kidz image and prepare for update
 #
 
-IMAGE_URL=http://192.168.99.11/images/raspi-kidz/sdcard.img
-
-extract_partition()
-{
-	_infile=${1} _partnum=${2} _outfile=${3}
-
-	_part=$(partx -o START,SECTORS -g -n "${_partnum}" "${_infile}" | \
-				sed -e 's/^\s*//' -e 's/\s*$//')
-	_start=${_part%% *}
-	_sectors=${_part##* }
-
-	dd conv=fsync bs=512 skip="${_start}" count="${_sectors}" if="${_infile}" \
-	   of="${_outfile}"
-}
+BASE_IMAGE_URL=http://192.168.99.11/images/raspi-kidz
 
 if [ "$(id -u)" -ne 0 ] ; then
 	echo "This script needs to be run as root" >&2
 	exit 1
 fi
 
-if ! [ -d /storage ] ; then
-	echo "No such directory: /storage" >&2
+if [ -b /dev/mmcblk0 ] ; then
+	# Raspberry Pi
+	image_url=${BASE_IMAGE_URL}/sdcard.img
+	boot_part=/dev/mmcblkp0p1
+	stor_part=/dev/mmcblk0p3
+elif [ -b /dev/sda ] ; then
+	# PC
+	image_url=${BASE_IMAGE_URL}/disk.img
+	boot_part=
+	stor_part=/dev/sda2
+elif [ -b /dev/vda ] ; then
+	# Raspberry Pi in QEMU
+	image_url=${BASE_IMAGE_URL}/sdcard.img
+	boot_part=/dev/vda1
+	stor_part=/dev/vda3
+else
+	echo "Root device not found" >&2
 	exit 1
 fi
 
-if [ -b /dev/mmcblk0 ] ; then
-	boot_part=/dev/mmcblk0p1
-	storage_part=/dev/mmcblk0p3
-else
-	boot_part=/dev/vda1
-	storage_part=/dev/vda3
-fi
-
 # Remount the storage partition read-write
-mount -o remount,rw "${storage_part}" /storage
+mount -o remount,rw "${stor_part}" /storage
 cd /storage
+rm -f image.img
 
 # Download the image
 echo "-- Downloading image ..."
-wget -O image.img "${IMAGE_URL}"
-
-# Extract the boot partition
-echo "-- Extracting boot partition ..."
-extract_partition image.img 1 boot.img
-
-# Extract the root partition
-echo "-- Extracting root partition ..."
-extract_partition image.img 2 root.img
-
-# Cleanup
-rm -f image.img
+wget -O image.img "${image_url}"
 
 # Remount the storage partition read-only
 cd /
-mount -o remount,ro "${storage_part}" /storage
+mount -o remount,ro "${stor_part}" /storage
 
 # Modify config.txt and cmdline.txt
-mount "${boot_part}" /boot
-echo "initramfs initrd.img" >> /boot/config.txt
-echo "console=tty1" > /boot/cmdline.txt
-umount /boot
+if [ -n "${boot_part}" ] ; then
+	mount "${boot_part}" /boot
+	echo "initramfs initrd.img" >> /boot/config.txt
+	echo "console=tty1" > /boot/cmdline.txt
+	umount /boot
+fi
 
 echo "You need to reboot to perform the actual update"
