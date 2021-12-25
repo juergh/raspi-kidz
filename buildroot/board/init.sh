@@ -17,8 +17,10 @@ set -e
 trap emergency EXIT
 
 [ -d /dev ] || mkdir -m 0755 /dev
+[ -d /sys ] || mkdir /sys
 [ -d /proc ] || mkdir /proc
 mount -t devtmpfs devtmpfs /dev
+mount -t sysfs sysfs /sys
 mount -t proc proc /proc
 
 echo "-- Waiting for root device ..."
