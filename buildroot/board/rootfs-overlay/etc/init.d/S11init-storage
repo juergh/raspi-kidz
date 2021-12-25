@@ -6,20 +6,31 @@
 
 case "$1" in
 	start)
-		stor_part=$(findfs LABEL=storage)
-		if [ -z "${stor_part}" ] ; then
+		if [ -b /dev/mmcblk0 ] ; then
+			# Raspberry Pi
+			root_dev=/dev/mmcblk0
+			root_part=/dev/mmcblk0p2
+			stor_part=/dev/mmcblk0p3
+		elif [ -b /dev/vda ] ; then
+			# Raspberry Pi in QEMU
+			root_dev=/dev/vda
+			root_part=/dev/vda2
+			stor_part=/dev/vda3
+		elif [ -b /dev/sda ] ; then
+			# PC
+			root_dev=/dev/sda
+			root_part=/dev/sda1
+			stor_part=/dev/sda2
+		fi
+
+		if ! [ -b "${stor_part}" ] ; then
 			printf "Creating storage partition: "
 			result="OK"
 
-			root_part=$(findfs LABEL=rootfs)
-
-			root_dev=/dev/$(lsblk -no pkname "${root_part}")
 			root_dev_size=$(cat /sys/class/block/"${root_dev##*/}"/size)
-
 			root_part_num=$(cat /sys/class/block/"${root_part##*/}"/partition)
 			root_part_end=$(partx -s -g -o END -n "${root_part_num}" "${root_dev}")
 
-			stor_part=${root_part%${root_part_num}}$((root_part_num + 1))
 			stor_part_start=$(((root_part_end + 2048) / 2048 * 2048))  # Align to 2048 sectors
 			stor_part_end=$((root_dev_size - 1))
 
