@@ -6,7 +6,7 @@ BUILDD := $(PWD)/buildd/$(V)
 
 BR2_DIR := $(BUILDD)/buildroot
 BR2_VERSION := 2021.08.3
-BR2_EXTERNAL := $(PWD)/raspi_kidz
+BR2_EXTERNAL := $(PWD)/buildroot
 BR2_DEFCONFIG := $(V)_defconfig
 BR2_MAKE := BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR)
 
@@ -19,7 +19,7 @@ KERNEL_IMG := $(KERNEL_DIR)/arch/arm64/boot/Image
 NUM_CPUS := $(shell getconf _NPROCESSORS_ONLN)
 KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
 
-ifeq ($(wildcard raspi_kidz/configs/$(BR2_DEFCONFIG)),)
+ifeq ($(wildcard buildroot/configs/$(BR2_DEFCONFIG)),)
   $(error "Invalid version: $(V)")
 endif
 
