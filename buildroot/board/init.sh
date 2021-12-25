@@ -27,8 +27,8 @@ while [ -z "${root_dev}" ] ; do
     sleep 1
 	if [ -b /dev/mmcblk0 ] ; then
 		# Raspberry Pi
-		root_dev=/dev/mmcblkp0
-		first_part=/dev/mmcblkp0p1
+		root_dev=/dev/mmcblk0
+		first_part=/dev/mmcblk0p1
 		stor_part=/dev/mmcblk0p3
 	elif [ -b /dev/sda ] ; then
 		# PC

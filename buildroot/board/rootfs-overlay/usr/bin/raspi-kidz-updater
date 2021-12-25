@@ -13,7 +13,7 @@ fi
 if [ -b /dev/mmcblk0 ] ; then
 	# Raspberry Pi
 	image_url=${BASE_IMAGE_URL}/sdcard.img
-	boot_part=/dev/mmcblkp0p1
+	boot_part=/dev/mmcblk0p1
 	stor_part=/dev/mmcblk0p3
 elif [ -b /dev/sda ] ; then
 	# PC
