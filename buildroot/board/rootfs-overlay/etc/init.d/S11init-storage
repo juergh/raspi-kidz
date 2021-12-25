@@ -20,7 +20,7 @@ case "$1" in
 			root_part_end=$(partx -s -g -o END -n "${root_part_num}" "${root_dev}")
 
 			stor_part=${root_part%${root_part_num}}$((root_part_num + 1))
-			stor_part_start=$((root_part_end + 1))
+			stor_part_start=$(((root_part_end + 2048) / 2048 * 2048))  # Align to 2048 sectors
 			stor_part_end=$((root_dev_size - 1))
 
 			if ! parted -s "${root_dev}" mkpart primary "${stor_part_start}"s "${stor_part_end}"s ; then
