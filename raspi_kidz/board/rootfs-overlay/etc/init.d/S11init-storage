@@ -6,31 +6,30 @@
 
 case "$1" in
 	start)
-		if [ -b /dev/mmcblk0 ] ; then
-			dev=/dev/mmcblk0
-			part3=/dev/mmcblk0p3
-		else
-			dev=/dev/vda
-			part3=/dev/vda3
-		fi
-
-		if ! [ -b "${part3}" ] ; then
+		stor_part=$(findfs LABEL=storage)
+		if [ -z "${stor_part}" ] ; then
 			printf "Creating storage partition: "
 			result="OK"
 
-			part2_end=$(partx -s -g -o END -n 2 "${dev}")
-			part3_start=$((part2_end + 1))
+			root_part=$(findfs LABEL=rootfs)
 
-			dev_size=$(cat "/sys/block/${dev##*/}/size")
-			part3_end=$((dev_size - 1))
+			root_dev=/dev/$(lsblk -no pkname "${root_part}")
+			root_dev_size=$(cat /sys/class/block/"${root_dev##*/}"/size)
 
-			if ! parted -s "${dev}" mkpart primary "${part3_start}"s "${part3_end}"s ; then
+			root_part_num=$(cat /sys/class/block/"${root_part##*/}"/partition)
+			root_part_end=$(partx -s -g -o END -n "${root_part_num}" "${root_dev}")
+
+			stor_part=${root_part%${root_part_num}}$((root_part_num + 1))
+			stor_part_start=$((root_part_end + 1))
+			stor_part_end=$((root_dev_size - 1))
+
+			if ! parted -s "${root_dev}" mkpart primary "${stor_part_start}"s "${stor_part_end}"s ; then
 				result="FAIL"
 			fi
 
 			printf "Creating storage filesystem: "
 			result="OK"
-			if ! mkfs.ext4 -F -L storage "${part3}" ; then
+			if ! mkfs.ext4 -F -L storage "${stor_part}" ; then
 				result="FAIL"
 			fi
 			echo "${result}"
@@ -39,7 +38,7 @@ case "$1" in
 		printf "Mounting storage partition: "
 		mkdir -p /storage
 		result="OK"
-		if ! mount -o ro "${part3}" /storage ; then
+		if ! mount -o ro "${stor_part}" /storage ; then
 			result="FAIL"
 		fi
 		echo "${result}"
