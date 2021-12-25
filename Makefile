@@ -62,7 +62,7 @@ $(KERNEL_IMG): $(KERNEL_DIR)/Makefile
 
 qemu: qemu-$(V)
 
-qemu-pc_kidz:
+qemu-pc-kidz:
 	./qemu-pc --mem 4096 --smp 4 $(BR2_DIR)/output/images/disk.img
 
 qemu-raspi_kidz: $(KERNEL_IMG)
