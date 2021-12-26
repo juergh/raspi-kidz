@@ -43,12 +43,17 @@ wget -O image.img "${image_url}"
 cd /
 mount -o remount,ro "${stor_part}" /storage
 
-# Modify config.txt and cmdline.txt
+# Modify config.txt and cmdline.txt to boot into the updater
 if [ -n "${boot_part}" ] ; then
 	mount "${boot_part}" /boot
 	echo "initramfs initrd.img" >> /boot/config.txt
 	echo "console=tty1" > /boot/cmdline.txt
 	umount /boot
+fi
+
+# Modify grub to boot into the updater
+if [ -e /boot/grub/grub.cfg ] ; then
+	sed -i 's/default="0"/default="1"/' /boot/grub/grub.cfg
 fi
 
 echo "You need to reboot to perform the actual update"

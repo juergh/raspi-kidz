@@ -73,8 +73,13 @@ if [ -d "${TARGET_DIR}"/boot/grub ] ; then
 set default="0"
 set timeout="2"
 
-menuentry "Buildroot" {
-        linux /boot/bzImage root=/dev/sda1 rootwait console=ttyS0
+menuentry "PC-Kidz" {
+        linux  /boot/bzImage root=/dev/sda1 rootwait console=ttyS0
+}
+
+menuentry "PC-Kidz Update" {
+        linux  /boot/bzImage
+        initrd /boot/initrd.img
 }
 EOF
 
