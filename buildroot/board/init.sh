@@ -26,7 +26,7 @@ mount -t proc proc /proc
 echo "-- Waiting for root device ..."
 root_dev=
 while [ -z "${root_dev}" ] ; do
-    sleep 1
+	sleep 1
 	if [ -b /dev/mmcblk0 ] ; then
 		# Raspberry Pi
 		root_dev=/dev/mmcblk0
@@ -51,7 +51,7 @@ mount "${stor_part}" /storage
 sleep 2
 
 echo "-- Flashing image ..."
-start=$(cat /sys/class/block/"${first_part}"/start)
+start=$(cat /sys/class/block/"${first_part##*/}"/start)
 dd conv=fsync bs=512 seek=${start} skip=${start} if=/storage/image.img \
    of="${root_dev}"
 
