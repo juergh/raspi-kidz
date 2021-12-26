@@ -89,6 +89,10 @@ menuconfig:
 	$(BR2_MAKE) menuconfig
 	$(MAKE) savedefconfig
 
+linux-menuconfig:
+	$(BR2_MAKE) linux-menuconfig
+	cp $(BR2_DIR)/output/build/linux-4.19.*/.config $(BR2_EXTERNAL)/board/$(V)/linux.config
+
 %:
 	$(BR2_MAKE) $@
 
