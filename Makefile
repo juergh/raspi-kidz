@@ -10,6 +10,12 @@ BR2_EXTERNAL := $(PWD)/buildroot
 BR2_CONFIG := $(BR2_EXTERNAL)/configs/$(BOARD).config
 BR2_MAKE := BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR)
 
+ifeq ($(BOARD),raspi-kidz)
+  BR_KERNEL := linux-custom
+else
+  BR_KERNEL := linux-4.19.222
+endif
+
 KERNEL_VER := 5.4.y
 KERNEL_CFG := DRM DRM_BOCHS SND_ENS1370 OVERLAY_FS
 
@@ -86,7 +92,7 @@ menuconfig: config
 
 linux-menuconfig: $(BR2_DIR)
 	$(BR2_MAKE) linux-menuconfig
-	cp $(BR2_DIR)/output/build/linux-4.19.*/.config \
+	cp $(BR2_DIR)/output/build/$(BR_KERNEL)/.config \
 	   $(BR2_EXTERNAL)/board/$(BOARD)/linux.config
 
 %:
