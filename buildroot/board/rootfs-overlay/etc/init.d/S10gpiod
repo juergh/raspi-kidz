@@ -10,6 +10,15 @@ case "$1" in
 		( /usr/bin/gpiod 2>&1 | logger -s -t gpiod & ) &
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
 		;;
+
+	stop)
+		/bin/true
+		;;
+
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 1
+		;;
 esac
 
 exit $?

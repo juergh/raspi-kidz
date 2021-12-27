@@ -6,10 +6,6 @@
 
 case "$1" in
 	start)
-		printf "Restoring ALSA state: "
-		alsactl -f /etc/asound.state restore
-		[ $? = 0 ] && echo "OK" || echo "FAIL"
-
 		printf "Starting qplayer: "
 		( LANG=en_US.UTF-8 /usr/bin/qplayer --platform linuxfb 2>&1 | logger -t qplayer & ) &
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
@@ -19,6 +15,11 @@ case "$1" in
 		printf "Stopping qplayer: "
 		killall /usr/bin/qplayer
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 1
 		;;
 esac
 

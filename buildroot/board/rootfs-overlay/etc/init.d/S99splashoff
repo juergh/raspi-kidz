@@ -7,10 +7,19 @@
 SPLASH_IMAGE_POWEROFF=/var/lib/splash/poweroff.png
 
 case "$1" in
+	start)
+		/bin/true
+		;;
+
 	stop)
 		printf "Displaying splash image (poweroff): "
 		echo "q" | /usr/bin/fbv "$SPLASH_IMAGE_POWEROFF" >/dev/null
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 1
 		;;
 esac
 

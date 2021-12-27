@@ -12,9 +12,11 @@ case "$1" in
 		done
 		echo "DONE"
 		;;
+
 	stop)
 		/bin/true
 		;;
+
 	*)
 		echo "Usage: $0 {start|stop}"
 		exit 1
