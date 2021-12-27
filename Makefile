@@ -4,11 +4,11 @@ BOARD ?= raspi-kidz
 
 BUILDD := $(PWD)/buildd/$(BOARD)
 
-BR2_DIR := $(BUILDD)/buildroot
-BR2_VERSION := 2021.08.3
-BR2_EXTERNAL := $(PWD)/buildroot
-BR2_CONFIG := $(BR2_EXTERNAL)/configs/$(BOARD).config
-BR2_MAKE := BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR)
+BR_DIR := $(BUILDD)/buildroot
+BR_VERSION := 2021.08.3
+BR_EXTERNAL := $(PWD)/buildroot
+BR_CONFIG := $(BR_EXTERNAL)/configs/$(BOARD).config
+BR_MAKE := BR2_EXTERNAL=$(BR_EXTERNAL) $(MAKE) -C $(BR_DIR)
 
 ifeq ($(BOARD),raspi-kidz)
   BR_KERNEL := linux-custom
@@ -25,7 +25,7 @@ KERNEL_IMG := $(KERNEL_DIR)/arch/arm64/boot/Image
 NUM_CPUS := $(shell getconf _NPROCESSORS_ONLN)
 KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
 
-ifeq ($(wildcard $(BR2_CONFIG)),)
+ifeq ($(wildcard $(BR_CONFIG)),)
   $(error "Invalid version: $(BOARD)")
 endif
 
@@ -34,13 +34,13 @@ endif
 
 default: config all
 
-$(BR2_DIR):
-	mkdir -p $(BR2_DIR)
-	git clone --depth 1 --branch $(BR2_VERSION) \
-	    git://git.buildroot.net/buildroot $(BR2_DIR)
+$(BR_DIR):
+	mkdir -p $(BR_DIR)
+	git clone --depth 1 --branch $(BR_VERSION) \
+	    git://git.buildroot.net/buildroot $(BR_DIR)
 
-config: $(BR2_DIR)
-	cp $(BR2_CONFIG) $(BR2_DIR)/.config
+config: $(BR_DIR)
+	cp $(BR_CONFIG) $(BR_DIR)/.config
 
 deepclean:
 	rm -rf $(BUILDD)
@@ -67,15 +67,15 @@ $(KERNEL_IMG): $(KERNEL_DIR)/Makefile
 qemu: qemu-$(BOARD)
 
 qemu-pc-kidz:
-	./qemu-pc --mem 4096 --smp 4 $(BR2_DIR)/output/images/disk.img
+	./qemu-pc --mem 4096 --smp 4 $(BR_DIR)/output/images/disk.img
 
 qemu-raspi-kidz: $(KERNEL_IMG)
 	./qemu-raspi --mem 512 --smp 4 $(KERNEL_IMG) \
-	    $(BR2_DIR)/output/images/sdcard.img
+	    $(BR_DIR)/output/images/sdcard.img
 
 qemu-initrd: $(KERNEL_IMG)
-	./qemu-raspi --initrd $(BR2_DIR)/output/images/initrd.img --mem 512 \
-	    --smp 4 $(KERNEL_IMG) $(BR2_DIR)/output/images/sdcard.img
+	./qemu-raspi --initrd $(BR_DIR)/output/images/initrd.img --mem 512 \
+	    --smp 4 $(KERNEL_IMG) $(BR_DIR)/output/images/sdcard.img
 
 # ----------------------------------------------------------------------------
 # Buildroot targets
@@ -83,19 +83,19 @@ qemu-initrd: $(KERNEL_IMG)
 all: WIFI_SSID ?= $(shell pass show local/wifi | sed -n 's/^ssid: //p')
 all: WIFI_PASS ?= $(shell pass show local/wifi | sed -n 's/^passphrase: //p')
 all:
-	@WIFI_SSID="$(WIFI_SSID)" WIFI_PASS="$(WIFI_PASS)" $(BR2_MAKE) all
-	rm -f $(BR2_DIR)/output/target/etc/wpa_supplicant.conf
+	@WIFI_SSID="$(WIFI_SSID)" WIFI_PASS="$(WIFI_PASS)" $(BR_MAKE) all
+	rm -f $(BR_DIR)/output/target/etc/wpa_supplicant.conf
 
 menuconfig: config
-	$(BR2_MAKE) menuconfig
-	cp  $(BR2_DIR)/.config $(BR2_CONFIG)
+	$(BR_MAKE) menuconfig
+	cp  $(BR_DIR)/.config $(BR_CONFIG)
 
-linux-menuconfig: $(BR2_DIR)
-	$(BR2_MAKE) linux-menuconfig
-	cp $(BR2_DIR)/output/build/$(BR_KERNEL)/.config \
-	   $(BR2_EXTERNAL)/board/$(BOARD)/linux.config
+linux-menuconfig: $(BR_DIR)
+	$(BR_MAKE) linux-menuconfig
+	cp $(BR_DIR)/output/build/$(BR_KERNEL)/.config \
+	   $(BR_EXTERNAL)/board/$(BOARD)/linux.config
 
 %:
-	$(BR2_MAKE) $@
+	$(BR_MAKE) $@
 
 .PHONY: default defconfig deepclean qemu all menuconfig
