@@ -4,5 +4,4 @@
 #  1 [Headphones     ]: bcm2835_headphonbcm2835 Headphones - bcm2835 Headphones
 #                       bcm2835 Headphones
 
-defaults.pcm.card 1
-defaults.ctl.card 1
+DEFAULT=1

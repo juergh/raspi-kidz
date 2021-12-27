@@ -11,8 +11,10 @@ ALSA_DEV=${ALSA_DEV%% *}
 case "$1" in
 	start)
 		printf "Restoring ALSA state for %s: " "${ALSA_DEV}"
-		alsactl -f /etc/asound.state."${ALSA_DEV}" restore
-		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		result="OK"
+		. /etc/asound.conf."${ALSA_DEV}" || result="FAIL"
+		alsactl -f /etc/asound.state."${ALSA_DEV}" restore "${DEFAULT}" || result="FAIL"
+		echo "${result}"
 		;;
 
 	stop)

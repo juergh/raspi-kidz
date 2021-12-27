@@ -1,8 +1,7 @@
-# $ cat /proc/asound/cards 
+# $ cat /proc/asound/cards
 #  0 [Generic        ]: HDA-Intel - HDA Intel
 #                       HDA Intel at 0xf0344000 irq 28
 #  0 [Generic_1      ]: HDA-Intel - HDA Intel
 #                       HDA Intel at 0xf0340000 irq 16
 
-defaults.pcm.card 0
-defaults.ctl.card 0
+DEFAULT=0
