@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# RASPI-KIDZ
+# Initialize asound conf and state
+#
+
+if [ -e /etc/asound.conf ] && [ -e /etc/asound.state ] ; then
+	exit 0
+fi
+
+SOUND_DEV=$(head -1 /proc/asound/cards | tr '[A-Z]' '[a-z]')
+SOUND_DEV=${SOUND_DEV#*: }
+SOUND_DEV=${SOUND_DEV%% *}
+
+case "$1" in
+	start)
+		printf "Initializing asound for %s: " "${SOUND_DEV}"
+		result=0
+		ln -sf asound.conf."${SOUND_DEV}" /etc/asound.conf || result=1
+		ln -sf asound.state."${SOUND_DEV}" /etc/asound.state || result=1
+		if [ ${result} -eq 1 ] ; then
+			echo "FAIL"
+			exit 1
+		fi
+		echo "OK"
+		exit 0
+		;;
+	stop)
+		exit 0
+		;;
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 1
+		;;
+esac
+
+# We should never get here
+exit 1
