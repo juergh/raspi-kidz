@@ -1,13 +1,13 @@
 #!/bin/make
 
-V ?= raspi-kidz
+BOARD ?= raspi-kidz
 
-BUILDD := $(PWD)/buildd/$(V)
+BUILDD := $(PWD)/buildd/$(BOARD)
 
 BR2_DIR := $(BUILDD)/buildroot
 BR2_VERSION := 2021.08.3
 BR2_EXTERNAL := $(PWD)/buildroot
-BR2_CONFIG := $(BR2_EXTERNAL)/configs/$(V).config
+BR2_CONFIG := $(BR2_EXTERNAL)/configs/$(BOARD).config
 BR2_MAKE := BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR)
 
 KERNEL_VER := 5.4.y
@@ -20,7 +20,7 @@ NUM_CPUS := $(shell getconf _NPROCESSORS_ONLN)
 KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
 
 ifeq ($(wildcard $(BR2_CONFIG)),)
-  $(error "Invalid version: $(V)")
+  $(error "Invalid version: $(BOARD)")
 endif
 
 # ----------------------------------------------------------------------------
@@ -58,7 +58,7 @@ $(KERNEL_IMG): $(KERNEL_DIR)/Makefile
 	done ; \
 	$(KMAKE) -j$(NUM_CPUS) Image
 
-qemu: qemu-$(V)
+qemu: qemu-$(BOARD)
 
 qemu-pc-kidz:
 	./qemu-pc --mem 4096 --smp 4 $(BR2_DIR)/output/images/disk.img
@@ -87,7 +87,7 @@ menuconfig: config
 linux-menuconfig: $(BR2_DIR)
 	$(BR2_MAKE) linux-menuconfig
 	cp $(BR2_DIR)/output/build/linux-4.19.*/.config \
-	   $(BR2_EXTERNAL)/board/$(V)/linux.config
+	   $(BR2_EXTERNAL)/board/$(BOARD)/linux.config
 
 %:
 	$(BR2_MAKE) $@
