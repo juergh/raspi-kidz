@@ -1,0 +1,31 @@
+#!/bin/bash -eu
+#
+# Copy music to a raspi-kidz device
+#
+
+path=${1}
+
+ssh_opts=(
+	"-o" "StrictHostKeyChecking=no"
+	"-o" "UserKnownHostsFile=/dev/null"
+	"-o" "Port=5022"
+	"-o" "User=admin"
+)
+
+ssh-copy-id "${ssh_opts[@]}" localhost
+
+cat <<EOF | ssh "${ssh_opts[@]}" localhost 'sudo sh -'
+dev=\$(mount | awk '\$3 == "/storage" { print \$1 }')
+mount -o remount,rw \${dev} /storage
+mkdir -p /storage/music
+chmod 777 /storage/music
+EOF
+
+scp -r "${ssh_opts[@]}" "${path}" localhost:/storage/music
+
+
+cat <<EOF | ssh "${ssh_opts[@]}" localhost 'sudo sh -'
+dev=\$(mount | awk '\$3 == "/storage" { print \$1 }')
+chmod 755 /storage/music
+mount -o remount,ro \${dev} /storage
+EOF
