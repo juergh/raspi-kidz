@@ -13,7 +13,7 @@ BR_MAKE := BR2_EXTERNAL=$(BR_EXTERNAL) $(MAKE) -C $(BR_DIR)
 ifeq ($(BOARD),raspi-kidz)
   BR_KERNEL := linux-custom
 else
-  BR_KERNEL := linux-4.19.222
+  BR_KERNEL := linux-5.10.88
 endif
 
 ifeq ($(wildcard $(BR_CONFIG)),)
