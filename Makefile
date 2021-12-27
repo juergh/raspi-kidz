@@ -7,7 +7,7 @@ BUILDD := $(PWD)/buildd/$(V)
 BR2_DIR := $(BUILDD)/buildroot
 BR2_VERSION := 2021.08.3
 BR2_EXTERNAL := $(PWD)/buildroot
-BR2_DEFCONFIG := $(V)_defconfig
+BR2_CONFIG := $(BR2_EXTERNAL)/configs/$(V).config
 BR2_MAKE := BR2_EXTERNAL=$(BR2_EXTERNAL) $(MAKE) -C $(BR2_DIR)
 
 KERNEL_VER := 5.4.y
@@ -19,24 +19,22 @@ KERNEL_IMG := $(KERNEL_DIR)/arch/arm64/boot/Image
 NUM_CPUS := $(shell getconf _NPROCESSORS_ONLN)
 KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
 
-ifeq ($(wildcard buildroot/configs/$(BR2_DEFCONFIG)),)
+ifeq ($(wildcard $(BR2_CONFIG)),)
   $(error "Invalid version: $(V)")
 endif
 
 # ----------------------------------------------------------------------------
 # Build targets
 
-default:
-	$(MAKE) defconfig
-	$(MAKE) all
+default: config all
 
 $(BR2_DIR):
 	mkdir -p $(BR2_DIR)
 	git clone --depth 1 --branch $(BR2_VERSION) \
 	    git://git.buildroot.net/buildroot $(BR2_DIR)
 
-defconfig: $(BR2_DIR)
-	$(MAKE) $(BR2_DEFCONFIG)
+config: $(BR2_DIR)
+	cp $(BR2_CONFIG) $(BR2_DIR)/.config
 
 deepclean:
 	rm -rf $(BUILDD)
@@ -76,22 +74,20 @@ qemu-initrd: $(KERNEL_IMG)
 # ----------------------------------------------------------------------------
 # Buildroot targets
 
-all: WIFI_SSID ?= $(shell pass show local/wifi | grep '^ssid: ' | \
-			sed 's/^ssid: //')
-all: WIFI_PASS ?= $(shell pass show local/wifi | grep '^passphrase: ' | \
-			sed 's/^passphrase: //')
+all: WIFI_SSID ?= $(shell pass show local/wifi | sed -n 's/^ssid: //p')
+all: WIFI_PASS ?= $(shell pass show local/wifi | sed -n 's/^passphrase: //p')
 all:
 	@WIFI_SSID="$(WIFI_SSID)" WIFI_PASS="$(WIFI_PASS)" $(BR2_MAKE) all
 	rm -f $(BR2_DIR)/output/target/etc/wpa_supplicant.conf
 
-menuconfig:
-	$(MAKE) defconfig
+menuconfig: config
 	$(BR2_MAKE) menuconfig
-	$(MAKE) savedefconfig
+	cp  $(BR2_DIR)/.config $(BR2_CONFIG)
 
-linux-menuconfig:
+linux-menuconfig: $(BR2_DIR)
 	$(BR2_MAKE) linux-menuconfig
-	cp $(BR2_DIR)/output/build/linux-4.19.*/.config $(BR2_EXTERNAL)/board/$(V)/linux.config
+	cp $(BR2_DIR)/output/build/linux-4.19.*/.config \
+	   $(BR2_EXTERNAL)/board/$(V)/linux.config
 
 %:
 	$(BR2_MAKE) $@
