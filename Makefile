@@ -16,6 +16,12 @@ else
   BR_KERNEL := linux-4.19.222
 endif
 
+ifeq ($(wildcard $(BR_CONFIG)),)
+  $(error "Invalid board: $(BOARD)")
+endif
+
+# QEMU related variables
+
 KERNEL_VER := 5.4.y
 KERNEL_CFG := DRM DRM_BOCHS SND_ENS1370 OVERLAY_FS
 
@@ -24,10 +30,6 @@ KERNEL_IMG := $(KERNEL_DIR)/arch/arm64/boot/Image
 
 NUM_CPUS := $(shell getconf _NPROCESSORS_ONLN)
 KMAKE := ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make
-
-ifeq ($(wildcard $(BR_CONFIG)),)
-  $(error "Invalid version: $(BOARD)")
-endif
 
 # ----------------------------------------------------------------------------
 # Build targets
