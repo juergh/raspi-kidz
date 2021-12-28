@@ -97,7 +97,9 @@ qemu_opts=(
 	"-device" "virtio-serial-pci"
 	"-device" "virtio-net-pci,netdev=net0"
 	"-netdev" "user,id=net0,hostfwd=tcp::5022-:22"
-	"-drive" "file=${tmp_image},format=qcow2"
+	"-drive" "file=${tmp_image},format=qcow2,id=disk,if=none"
+	"-device" "ahci,id=ahci"
+	"-device" "ide-hd,drive=disk,bus=ahci.0"
 )
 
 echo
