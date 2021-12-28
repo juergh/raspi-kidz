@@ -4,17 +4,16 @@
 # Restore ALSA state
 #
 
-ALSA_DEV=$(head -1 /proc/asound/cards | tr '[:upper:]' '[:lower:]')
-ALSA_DEV=${ALSA_DEV#*: }
-ALSA_DEV=${ALSA_DEV%% *}
-
 case "$1" in
 	start)
-		printf "Restoring ALSA state for %s: " "${ALSA_DEV}"
-		result="OK"
-		. /etc/asound.conf."${ALSA_DEV}" || result="FAIL"
-		alsactl -f /etc/asound.state."${ALSA_DEV}" restore "${DEFAULT}" || result="FAIL"
-		echo "${result}"
+		for f in /proc/asound/card*/id ; do
+			id=$(cat "${f}")
+			if [ -e /etc/asound.state."${id}" ] ; then
+				printf "Restoring ALSA state for %s: " "${id}"
+				alsactl -f /etc/asound.state."${id}" restore "${id}"
+				[ $? = 0 ] && echo "OK" || echo "FAIL"
+			fi
+		done
 		;;
 
 	stop)
