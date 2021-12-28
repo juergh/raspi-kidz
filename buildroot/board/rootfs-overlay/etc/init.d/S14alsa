@@ -8,11 +8,20 @@ case "$1" in
 	start)
 		for f in /proc/asound/card*/id ; do
 			id=$(cat "${f}")
-			if [ -e /etc/asound.state."${id}" ] ; then
-				printf "Restoring ALSA state for %s: " "${id}"
-				alsactl -f /etc/asound.state."${id}" restore "${id}"
-				[ $? = 0 ] && echo "OK" || echo "FAIL"
+			if ! [ -e /etc/asound.state."${id}" ] ; then
+				continue
 			fi
+
+			# Set the card as default
+			num=${f%/id}
+			num=${num#*/card}
+			echo "defaults.pcm.card ${num}" >  /etc/asound.conf
+			echo "defaults.ctl.card ${num}" >> /etc/asound.conf
+
+			# Restore the card state
+			printf "Restoring ALSA state for %s: " "${id}"
+			alsactl -f /etc/asound.state."${id}" restore "${id}"
+			[ $? = 0 ] && echo "OK" || echo "FAIL"
 		done
 		;;
 
