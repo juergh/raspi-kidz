@@ -28,4 +28,7 @@ cat <<EOF | ssh "${ssh_opts[@]}" localhost 'sudo sh -'
 dev=\$(mount | awk '\$3 == "/storage" { print \$1 }')
 chmod 755 /storage/music
 mount -o remount,ro \${dev} /storage
+/etc/init.d/S19qplayer stop
+sleep 1
+/etc/init.d/S19qplayer start
 EOF
