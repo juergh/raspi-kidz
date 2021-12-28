@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# RASPI-KIDZ
+# Stop wpa_supplicant
+#
+
+if [ "$IFACE" = "wlan0" ] ; then
+	# Stop wpa_supplicant
+	start-stop-daemon --stop --oknodo --exec /usr/sbin/wpa_supplicant
+fi
