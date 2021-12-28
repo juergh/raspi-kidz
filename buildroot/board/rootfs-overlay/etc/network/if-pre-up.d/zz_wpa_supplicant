@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # RASPI-KIDZ
-# Handle eth0 and wlan0 interfaces (pre-up)
+# Run wpa_supplicant
 #
 
 if [ "$IFACE" = "eth0" ] ; then
@@ -9,15 +9,6 @@ if [ "$IFACE" = "eth0" ] ; then
 fi
 
 if [ "$IFACE" = "wlan0" ] ; then
-	grep -q "^brcmfmac " /proc/modules || exit 1
-
-	# Wait 5 secs for /sys/class/net/wlan0 to appear
-	for _ in $(seq 1 10) ; do
-		if [ -e /sys/class/net/wlan0 ] ; then
-			break
-		fi
-		sleep .5
-	done
 	[ -e /sys/class/net/wlan0 ] || exit 1
 
 	# Run wpa_supplicant
