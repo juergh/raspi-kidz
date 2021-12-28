@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# RASPI-KIDZ
+# Cycle the wlan0 interface (to fix broken ath9k/connman combination)
+#
+
+case "$1" in
+	start)
+		if [ -e /sys/class/net/wlan0 ] ; then
+			printf "Bringing down wlan0: "
+			ifdown wlan0
+			[ $? = 0 ] && echo "OK" || echo "FAIL"
+
+			sleep 1
+
+			printf "Bringing up wlan0: "
+			ifup wlan0
+			[ $? = 0 ] && echo "OK" || echo "FAIL"
+		fi
+		;;
+
+	stop)
+		/bin/true
+		;;
+
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 1
+		;;
+esac
+
+exit $?
