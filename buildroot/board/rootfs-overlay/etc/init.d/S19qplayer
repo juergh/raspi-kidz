@@ -4,6 +4,10 @@
 # Start/stop qplayer
 #
 
+if grep -q noqplayer /proc/cmdline ; then
+	exit 0
+fi
+
 case "$1" in
 	start)
 		printf "Starting qplayer: "
