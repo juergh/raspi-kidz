@@ -21,7 +21,6 @@ __EOF__
 if [ -n "${WIFI_SSID}" ] && [ -n "${WIFI_PASS}" ] ; then
 	conf="${TARGET_DIR}"/etc/wpa_supplicant.conf
 	cat << EOF > "${conf}"
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 update_config=1
 country=CH
 EOF
@@ -74,7 +73,7 @@ set default="0"
 set timeout="2"
 
 menuentry "PC-Kidz" {
-        linux  /boot/bzImage root=/dev/sda1 rootwait console=ttyS0
+        linux  /boot/bzImage root=/dev/sda1 rootwait net.ifnames=0 console=ttyS0
 }
 
 menuentry "PC-Kidz Update" {
@@ -83,7 +82,7 @@ menuentry "PC-Kidz Update" {
 }
 
 menuentry "PC-Kidz Rescue" {
-        linux  /boot/bzImage root=/dev/sda1 rootwait noqplayer
+        linux  /boot/bzImage root=/dev/sda1 rootwait net.ifnames=0 noqplayer
 }
 EOF
 
