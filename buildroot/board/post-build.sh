@@ -90,6 +90,10 @@ menuentry "PC-Kidz Rescue" {
         linux  /boot/bzImage rescue
         initrd /boot/initrd.img
 }
+
+menuentry "PC-Kidz NoQplayer" {
+        linux  /boot/bzImage root=/dev/sda1 rootwait net.ifnames=0 noqplayer
+}
 EOF
 
 	 # Copy grub 1st stage to binaries, required for genimage
