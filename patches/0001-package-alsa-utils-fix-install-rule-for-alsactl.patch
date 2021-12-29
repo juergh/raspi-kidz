@@ -1,0 +1,30 @@
+From 6c71b52235d88cd8d38b4fd02c87f791aaa8eff3 Mon Sep 17 00:00:00 2001
+From: Khoa Hoang <admin@khoahoang.com>
+Date: Fri, 10 Dec 2021 18:50:34 -0800
+Subject: [PATCH] package/alsa-utils: fix install rule for alsactl
+
+The copy command for /usr/share/alsa missing an asterisk cause it to copy to
+/usr/share/alsa/alsa instead of /usr/share/alsa where it should be.
+
+Signed-off-by: Khoa Hoang <admin@khoahoang.com>
+Signed-off-by: Arnout Vandecappelle (Essensium/Mind) <arnout@mind.be>
+---
+ package/alsa-utils/alsa-utils.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/package/alsa-utils/alsa-utils.mk b/package/alsa-utils/alsa-utils.mk
+index 427280c1e6cf..2603e52f1825 100644
+--- a/package/alsa-utils/alsa-utils.mk
++++ b/package/alsa-utils/alsa-utils.mk
+@@ -77,7 +77,7 @@ define ALSA_UTILS_INSTALL_TARGET_CMDS
+ 	fi
+ 	if [ -x "$(TARGET_DIR)/usr/sbin/alsactl" ]; then \
+ 		mkdir -p $(TARGET_DIR)/usr/share/; \
+-		cp -rdpf $(STAGING_DIR)/usr/share/alsa/ $(TARGET_DIR)/usr/share/alsa/; \
++		cp -rdpf $(STAGING_DIR)/usr/share/alsa/* $(TARGET_DIR)/usr/share/alsa/; \
+ 	fi
+ endef
+ 
+-- 
+2.30.2
+

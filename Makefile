@@ -9,6 +9,7 @@ BR_VERSION := 2021.08.3
 BR_EXTERNAL := $(PWD)/buildroot
 BR_CONFIG := $(BR_EXTERNAL)/configs/$(BOARD).config
 BR_MAKE := BR2_EXTERNAL=$(BR_EXTERNAL) $(MAKE) -C $(BR_DIR)
+BR_PATCHES_DIR := $(PWD)/patches
 
 ifeq ($(BOARD),raspi-kidz)
   BR_KERNEL := linux-custom
@@ -40,6 +41,10 @@ $(BR_DIR):
 	mkdir -p $(BR_DIR)
 	git clone --depth 1 --branch $(BR_VERSION) \
 	    git://git.buildroot.net/buildroot $(BR_DIR)
+	# Pach buildroot
+	for p in $(BR_PATCHES_DIR)/* ; do \
+	    ( cd $(BR_DIR) && patch -p1 < "$${p}" ); \
+	done
 
 config: $(BR_DIR)
 	cp $(BR_CONFIG) $(BR_DIR)/.config
