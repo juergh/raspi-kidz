@@ -23,6 +23,10 @@ mount -t devtmpfs devtmpfs /dev
 mount -t sysfs sysfs /sys
 mount -t proc proc /proc
 
+if grep -q emergency /proc/cmdline ; then
+	emergency
+fi
+
 echo "-- Waiting for root device ..."
 root_dev=
 while [ -z "${root_dev}" ] ; do
@@ -54,6 +58,7 @@ echo "-- Flashing image ..."
 start=$(cat /sys/class/block/"${first_part##*/}"/start)
 dd conv=fsync bs=512 seek=${start} skip=${start} if=/storage/image.img \
    of="${root_dev}"
+rm -f /storage/image.img
 
 umount /storage
 sync
