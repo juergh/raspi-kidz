@@ -53,6 +53,11 @@ mkdir -p "${initrd_dir}"/lib
 cp -dp "${TARGET_DIR}"/lib/libc.* "${TARGET_DIR}"/lib/libuClibc-* "${TARGET_DIR}"/lib/ld* "${initrd_dir}"/lib
 ln -s lib "${initrd_dir}"/lib32
 
+# Install e2fsck
+cp -dp "${TARGET_DIR}"/sbin/e2fsck "${initrd_dir}"/bin
+cp -dp  "${TARGET_DIR}"/usr/lib/libext2fs.* "${TARGET_DIR}"/usr/lib/libcom_err.* "${TARGET_DIR}"/usr/lib/libe2p.* \
+   "${TARGET_DIR}"/lib/libblkid.* "${TARGET_DIR}"/lib/libuuid.* "${initrd_dir}"/lib
+
 # Create the initrd image
 ( cd "${initrd_dir}" && \
   find . | cpio -H newc -o | gzip -9 > "${BINARIES_DIR}"/initrd.img )
@@ -82,7 +87,8 @@ menuentry "PC-Kidz Update" {
 }
 
 menuentry "PC-Kidz Rescue" {
-        linux  /boot/bzImage root=/dev/sda1 rootwait net.ifnames=0 noqplayer
+        linux  /boot/bzImage rescue
+        initrd /boot/initrd.img
 }
 EOF
 

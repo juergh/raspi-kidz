@@ -5,16 +5,16 @@
 
 #!/bin/busybox sh
 
-emergency()
+rescue()
 {
-	echo "-- Dropping into an emergency shell ..."
+	echo "-- Dropping into an rescue shell ..."
 	/bin/sh
 }
 
 /bin/busybox --install /bin
 
 set -e
-trap emergency EXIT
+trap rescue EXIT
 
 [ -d /dev ] || mkdir -m 0755 /dev
 [ -d /sys ] || mkdir /sys
@@ -23,8 +23,9 @@ mount -t devtmpfs devtmpfs /dev
 mount -t sysfs sysfs /sys
 mount -t proc proc /proc
 
-if grep -q emergency /proc/cmdline ; then
-	emergency
+if grep -q rescue /proc/cmdline ; then
+	rescue
+	reboot -f
 fi
 
 echo "-- Waiting for root device ..."
