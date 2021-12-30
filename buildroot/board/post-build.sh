@@ -78,7 +78,7 @@ set default="0"
 set timeout="2"
 
 menuentry "PC-Kidz" {
-        linux  /boot/bzImage root=/dev/sda1 rootwait net.ifnames=0 console=ttyS0
+        linux  /boot/bzImage root=/dev/sda1 rootwait net.ifnames=0 console=ttyS0 logo.nologo vt.global_cursor_default=0 modprobe.blacklist=psmouse
 }
 
 menuentry "PC-Kidz Update" {
