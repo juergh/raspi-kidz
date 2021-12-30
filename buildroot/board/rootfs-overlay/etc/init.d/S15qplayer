@@ -11,6 +11,7 @@ fi
 case "$1" in
 	start)
 		printf "Starting qplayer: "
+		[ -e /dev/fb0 ] && dd if=/dev/zero of=/dev/fb0 >/dev/null 2>&1
 		( LANG=en_US.UTF-8 /usr/bin/qplayer --platform linuxfb 2>&1 | logger -t qplayer & ) &
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
 		;;
