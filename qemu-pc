@@ -89,7 +89,7 @@ qemu_opts=(
 	"-M" "pc"
 	"-m" "${mem}"
 	"-smp" "${smp}"
-	"-device" "VGA,edid=on,xres=800,yres=480"
+	"-device" "VGA,edid=on,xres=1280,yres=768"
 	"-device" "usb-ehci"
 	"-device" "usb-kbd"
 	"-device" "intel-hda"
