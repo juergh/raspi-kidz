@@ -90,13 +90,15 @@ qemu-initrd: $(KERNEL_IMG)
 
 all: WIFI_SSID ?= $(shell pass show local/wifi | sed -n 's/^ssid: //p')
 all: WIFI_PASS ?= $(shell pass show local/wifi | sed -n 's/^passphrase: //p')
+all: GIT_HASH = $(shell git rev-parse HEAD)
 all:
-	@WIFI_SSID="$(WIFI_SSID)" WIFI_PASS="$(WIFI_PASS)" $(BR_MAKE) all
+	@WIFI_SSID="$(WIFI_SSID)" WIFI_PASS="$(WIFI_PASS)" GIT_HASH="$(GIT_HASH)" \
+	    $(BR_MAKE) all
 	rm -f $(BR_DIR)/output/target/etc/wpa_supplicant.conf
 
 menuconfig: config
 	$(BR_MAKE) menuconfig
-	cp  $(BR_DIR)/.config $(BR_CONFIG)
+	cp $(BR_DIR)/.config $(BR_CONFIG)
 
 linux-menuconfig: $(BR_DIR)
 	$(BR_MAKE) linux-menuconfig

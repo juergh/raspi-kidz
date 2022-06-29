@@ -112,3 +112,9 @@ case "${BOARD}" in
 		true
 		;;
 esac > "${TARGET_DIR}"/etc/qplayer.conf
+
+#
+# Inject the git hash into the image
+#
+
+echo "${GIT_HASH}" > "${TARGET_DIR}"/git_hash
