@@ -99,3 +99,16 @@ EOF
 	 # Copy grub 1st stage to binaries, required for genimage
 	cp -f "${HOST_DIR}"/lib/grub/i386-pc/boot.img "${BINARIES_DIR}"
 fi
+
+#
+# Set qplayer commandline options
+#
+
+case "${BOARD}" in
+	pc-kidz)
+		echo "--timeout 600"
+		;;
+	*)
+		true
+		;;
+esac > "${TARGET_DIR}"/etc/qplayer.conf
