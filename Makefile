@@ -1,6 +1,7 @@
 #!/bin/make
 
 BOARD ?= raspi-kidz
+export BOARD
 
 BUILDD := $(PWD)/buildd/$(BOARD)
 

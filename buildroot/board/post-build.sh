@@ -71,7 +71,7 @@ fi
 # Fix grub
 #
 
-if [ -d "${TARGET_DIR}"/boot/grub ] ; then
+if [ "${BOARD}" = "pc-kidz" ] ; then
 	# Use our own version of grub.cfg
 	cat <<EOF >"${TARGET_DIR}"/boot/grub/grub.cfg
 set default="0"
