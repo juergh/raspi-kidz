@@ -12,17 +12,17 @@ fi
 
 if [ -b /dev/mmcblk0 ] ; then
 	# Raspberry Pi
-	image_url=${BASE_IMAGE_URL}/sdcard.img
+	image_url=${BASE_IMAGE_URL}/raspi-kidz.img
 	boot_part=/dev/mmcblk0p1
 	stor_part=/dev/mmcblk0p3
 elif [ -b /dev/sda ] ; then
 	# PC
-	image_url=${BASE_IMAGE_URL}/disk.img
+	image_url=${BASE_IMAGE_URL}/pc-kidz.img
 	boot_part=
 	stor_part=/dev/sda2
 elif [ -b /dev/vda ] ; then
 	# Raspberry Pi in QEMU
-	image_url=${BASE_IMAGE_URL}/sdcard.img
+	image_url=${BASE_IMAGE_URL}/raspi-kidz.img
 	boot_part=/dev/vda1
 	stor_part=/dev/vda3
 else
@@ -36,7 +36,7 @@ cd /storage
 rm -f image.img
 
 # Download the image
-echo "-- Downloading image ..."
+echo "-- Download image ${image_url##*/} ..."
 wget -O image.img "${image_url}"
 
 # Remount the storage partition read-only
