@@ -15,7 +15,7 @@ BR_PATCHES_DIR := $(PWD)/patches
 ifeq ($(BOARD),raspi-kidz)
   BR_KERNEL := linux-custom
 else
-  BR_KERNEL := linux-5.10.88
+  BR_KERNEL := linux-5.10.127
 endif
 
 ifeq ($(wildcard $(BR_CONFIG)),)
