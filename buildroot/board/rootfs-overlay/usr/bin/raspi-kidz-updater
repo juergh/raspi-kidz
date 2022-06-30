@@ -6,7 +6,7 @@
 BASE_IMAGE_URL=http://192.168.99.11/images/raspi-kidz
 
 if [ "$(id -u)" -ne 0 ] ; then
-	echo "This script needs to be run as root" >&2
+	echo "-- This script needs to be run as root" >&2
 	exit 1
 fi
 
@@ -26,7 +26,7 @@ elif [ -b /dev/vda ] ; then
 	boot_part=/dev/vda1
 	stor_part=/dev/vda3
 else
-	echo "Root device not found" >&2
+	echo "-- Root device not found" >&2
 	exit 1
 fi
 
@@ -36,7 +36,7 @@ cd /storage
 rm -f image.img
 
 # Download the image
-echo "-- Download image ${image_url##*/} ..."
+echo "-- Download image ${image_url##*/}"
 wget -O image.img "${image_url}"
 
 # Remount the storage partition read-only
@@ -56,4 +56,4 @@ if [ -e /boot/grub/grub.cfg ] ; then
 	sed -i 's/default="0"/default="1"/' /boot/grub/grub.cfg
 fi
 
-echo "You need to reboot to perform the actual update"
+echo "-- You need to reboot to perform the actual update"

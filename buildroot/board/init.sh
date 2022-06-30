@@ -7,7 +7,7 @@
 
 rescue()
 {
-	echo "-- Dropping into an rescue shell ..."
+	echo "-- Drop into a rescue shell"
 	/bin/sh
 }
 
@@ -28,7 +28,7 @@ if grep -q rescue /proc/cmdline ; then
 	reboot -f
 fi
 
-echo "-- Waiting for root device ..."
+echo "-- Wait for root device"
 root_dev=
 while [ -z "${root_dev}" ] ; do
 	sleep 1
@@ -55,7 +55,7 @@ sleep 2
 mount "${stor_part}" /storage
 sleep 2
 
-echo "-- Flashing image ..."
+echo "-- Flash image"
 start=$(cat /sys/class/block/"${first_part##*/}"/start)
 dd conv=fsync bs=512 seek=${start} skip=${start} if=/storage/image.img \
    of="${root_dev}"
@@ -64,6 +64,6 @@ rm -f /storage/image.img
 umount /storage
 sync
 
-echo "Rebooting ..."
+echo "-- Reboot"
 sleep 1
 reboot -f
