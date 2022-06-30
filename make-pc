@@ -1,0 +1,3 @@
+#!/bin/bash -eu
+
+BOARD=pc-kidz make "${@}"
